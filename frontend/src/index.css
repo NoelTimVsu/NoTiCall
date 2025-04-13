@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* to add a plugin => @plugin "plugin-name"; */
+/* to extend configuration => @theme{ } || @theme{ --variable-name: value } */

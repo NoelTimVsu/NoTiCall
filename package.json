@@ -1,0 +1,14 @@
+{
+  "name": "video-chat-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test --prefix backend",
+    "build": "npm install --prefix backend && npm install --include=dev --prefix frontend && npm run build --prefix frontend",
+    "start": "npm install -g @nestjs/cli && nest --version && npm run start --prefix backend"
+  },
+  "keywords": [],
+  "author": "Noel Rojas & Tim Pham",
+  "license": "ISC",
+  "description": ""
+}
