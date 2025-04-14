@@ -3,7 +3,7 @@ const MainPage = () => {
     return (
       <main className="p-8 bg-gray-50 min-h-screen">
         <section className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">Welcome to VideoChat</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to NoTiCall</h1>
           <p className="text-gray-700 text-lg">
             Connect seamlessly with friends, family, and colleagues with our easy-to-use video chat platform.
           </p>
