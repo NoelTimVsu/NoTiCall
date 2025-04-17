@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,15 +13,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// cretae first table to test
 model User {
-  id            Int      @id @default(autoincrement())
-  username      String
-  email         String   @unique
-  password_hash String
-  full_name     String
-  profile_pic   String
-  created_at    DateTime
-  updated_at    DateTime
+  id                     Int                  @id @default(autoincrement())
+  username               String
+  email                  String               @unique
+  password_hash          String
+  full_name              String?
+  profile_pic            String?
+  created_at             DateTime             @default(now())
+  updated_at             DateTime             @updatedAt
+
+  // Relations
+  chatRooms              ChatRoom[]           @relation("UserCreatedChatRooms")
+  chatRoomMemberships    ChatRoomMember[]     @relation("UserChatRoomMemberships")
+  sentChatRoomMessages   ChatRoomMessages[]   @relation("SentChatRoomMessages")
+  sentMessages           Messages[]           @relation("SentMessages")
+  receivedMessages       Messages[]           @relation("ReceivedMessages")
+  friendRequestsSent     FriendShip[]         @relation("UserSentFriendRequests")
+  friendRequestsReceived FriendShip[]         @relation("UserReceivedFriendRequests")
 }
 
+model ChatRoom {
+  id               Int                  @id @default(autoincrement())
+  name             String?
+  created_by       Int
+  created_at       DateTime             @default(now())
+  updated_at       DateTime             @updatedAt
+
+  // Relations
+  creator          User                 @relation("UserCreatedChatRooms", fields: [created_by], references: [id])
+  members          ChatRoomMember[]    @relation("ChatRoomMembers")
+  messages         ChatRoomMessages[]  @relation("ChatRoomMessages")
+}
+
+model ChatRoomMember {
+  chat_room_id     Int
+  user_id          Int
+  joined_at        DateTime?           @default(now())
+
+  // Relations
+  chatRoom         ChatRoom            @relation("ChatRoomMembers", fields: [chat_room_id], references: [id])
+  user             User                @relation("UserChatRoomMemberships", fields: [user_id], references: [id])
+
+  @@id([chat_room_id, user_id])
+}
+
+model ChatRoomMessages {
+  room_message_id  Int                 @id @default(autoincrement())
+  chat_room_id     Int
+  sender_id        Int
+  content          String?
+  image            String?
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @updatedAt
+
+  // Relations
+  sender           User                @relation("SentChatRoomMessages", fields: [sender_id], references: [id])
+  chatRoom         ChatRoom            @relation("ChatRoomMessages", fields: [chat_room_id], references: [id])
+}
+
+model Messages {
+  sender_id        Int
+  receiver_id      Int
+  content          String?
+  image            String?
+  created_at       DateTime?           @default(now())
+  updated_at       DateTime?           @updatedAt
+
+  // Relations
+  sender           User                @relation("SentMessages", fields: [sender_id], references: [id])
+  receiver         User                @relation("ReceivedMessages", fields: [receiver_id], references: [id])
+
+  @@id([sender_id, receiver_id])
+}
+
+model FriendShip {
+  user_id          Int
+  friend_id        Int
+  status           Status?
+  created_at       DateTime            @default(now())
+
+  // Relations
+  user             User                @relation("UserSentFriendRequests", fields: [user_id], references: [id])
+  friend           User                @relation("UserReceivedFriendRequests", fields: [friend_id], references: [id])
+
+  @@id([user_id, friend_id])
+}
+
+enum Status {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
