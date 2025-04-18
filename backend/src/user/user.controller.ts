@@ -1,35 +1,40 @@
-import { Controller, Get, Put, Post, Body, Delete, Param } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Put,
+  Body,
+  Delete,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserDto } from "./user.dto";
+import { UserDto } from './user.dto';
+import { JwtCookieGuard } from 'src/auth/guard/jwt-cookie.guard';
+import { GetUser } from 'src/auth/decorator';
+import { User } from '@prisma/client';
 
-
-@Controller('user')
+@UseGuards(JwtCookieGuard)
+@Controller('users')
 export class UserController {
-    constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-    @Get()
-    findAll() {
-        return this.userService.findAll();
-    }
+  @Get()
+  getMe(@GetUser() user: User) {
+    return user;
+  }
 
-    @Get(':id')
-    findById(@Param('id') id: string) {
-        return this.userService.findById(Number(id));
-    }
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.userService.findById(Number(id));
+  }
 
-    @Post()
-    create(@Body() data: UserDto) {
-      return this.userService.create(data);
-    }
-  
-    @Put(':id')
-    update(@Param('id') id: string, @Body() data: UserDto) {
-      return this.userService.update(Number(id), data);
-    }
-  
-    @Delete(':id')
-    delete(@Param('id') id: string) {
-      return this.userService.delete(Number(id));
-    }
-    
+  @Put(':id')
+  update(@Param('id') id: string, @Body() data: UserDto) {
+    return this.userService.update(Number(id), data);
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.userService.delete(Number(id));
+  }
 }
