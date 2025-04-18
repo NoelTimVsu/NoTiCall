@@ -30,6 +30,32 @@
 ```bash
 $ npm install
 ```
+## Docker set up
+
+```bash
+# build the docker
+$ docker compose build
+
+# container ups
+$ docker compose up
+```
+## DB connection to the management DB app
+
+- username: postgres
+- Host name: localhost
+- Port: 5432
+- Pass: postgres
+
+## Prisma set up
+
+```bash
+# install prisma and db schema
+$ npm install prisma --save-dev
+$ npm install @prisma/client
+
+# generate prisma client
+$ npx prisma generate
+```
 
 ## Compile and run the project
 

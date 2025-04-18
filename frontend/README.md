@@ -52,3 +52,9 @@ export default tseslint.config({
   },
 })
 ```
+## Using Shadcn and Lucide-React
+
+Using Shadcn component libary to apply the model default styles from TailwindCSS. Lucide-React to apply the template icons from React.
+- npx shadcn@latest init
+- npx shadcn@latest add button
+- npm install lucide-react

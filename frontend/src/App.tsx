@@ -1,13 +1,14 @@
-import './App.css'
+import MainPage from "./pages/Main"
+import Navbar from "./pages/Navbar"
+
 
 function App() {
   return (
     <>
-      <div>
-        hello
-      </div>
+      <Navbar />
+      <MainPage />
     </>
   )
-}
+} 
 
 export default App
