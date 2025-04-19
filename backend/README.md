@@ -45,6 +45,7 @@ $ docker compose up
 - Host name: localhost
 - Port: 5432
 - Pass: postgres
+- DATABASE_URL=postgresql://<user>:<password>@<host>:<port>/<database_name>
 
 ## Prisma set up
 
@@ -54,7 +55,7 @@ $ npm install prisma --save-dev
 $ npm install @prisma/client
 
 # generate prisma client
-$ npx prisma generate
+$ npm run prisma:generate
 ```
 
 ## Compile and run the project
