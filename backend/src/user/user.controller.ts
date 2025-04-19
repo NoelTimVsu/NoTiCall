@@ -7,11 +7,11 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { UserService } from './user.service';
 import { UserDto } from './user.dto';
-import { JwtCookieGuard } from 'src/auth/guard/jwt-cookie.guard';
+import { JwtCookieGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
-import { User } from '@prisma/client';
 
 @UseGuards(JwtCookieGuard)
 @Controller('users')
