@@ -1,24 +1,23 @@
 import { Button } from "@/components/ui/button";
 import {
+  Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
-  Form,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
-import { useFormValidation } from "@/hooks/useFormValidation";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
+import { useFormValidation } from "@/hooks/useFormValidation";
 
-function Signup() {
+const Profile = () => {
   const form = useFormValidation();
   const {
     register,
@@ -26,38 +25,25 @@ function Signup() {
     formState: { errors },
   } = form;
 
-  const navigate = useNavigate();
-
   const onSubmit = (values: unknown) => {
     console.log(values);
   };
 
   return (
-    <section className="w-full min-h-screen flex justify-center items-center bg-muted px-4">
+    <section className="flex justify-center py-12">
       <Card className="w-full max-w-md shadow-md">
-        <CardHeader>
-          <CardTitle className="text-center text-3xl text-blue-600 font-bold">
-            NoTiCall
-          </CardTitle>
-          <CardDescription className="text-center">
-            Sign up to get started
-          </CardDescription>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Profile</CardTitle>
+          <CardDescription>Update your profile information</CardDescription>
         </CardHeader>
-
-        <CardContent className="space-y-6">
-          {/* CTA Buttons */}
-          <div className="space-y-2">
-            <Button variant="blueButton" className="w-full">
-              Get Started
-            </Button>
-            <Button variant="outline" className="w-full">
-              Create Free Account
-            </Button>
+        <CardContent>
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 rounded-full border-2 bg-white flex items-center justify-center text-lg font-bold">
+              ME
+            </div>
           </div>
-
-          {/* Signup Form */}
           <Form {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 name="fullName"
                 render={() => (
@@ -73,7 +59,6 @@ function Signup() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 name="username"
                 render={() => (
@@ -86,7 +71,6 @@ function Signup() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 name="email"
                 render={() => (
@@ -103,41 +87,15 @@ function Signup() {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                name="password"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password"
-                        {...register("password")}
-                      />
-                    </FormControl>
-                    <FormMessage>{errors.password?.message}</FormMessage>
-                  </FormItem>
-                )}
-              />
-
               <Button type="submit" className="w-full">
-                Create Account
+                Update Profile
               </Button>
             </form>
           </Form>
-
-          {/* Login Link */}
-          <div className="text-sm text-center">
-            <span>Already have an account? </span>
-            <Button variant="link" onClick={() => navigate("/login")}>
-              Log in
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </section>
   );
-}
+};
 
-export default Signup;
+export default Profile;

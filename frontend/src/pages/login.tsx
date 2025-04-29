@@ -10,6 +10,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 function Login() {
   const form = useFormValidation();
@@ -18,20 +25,28 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = form;
+
   const navigate = useNavigate();
+
   const onSubmit = (values: unknown) => {
     console.log(values);
   };
+
   return (
-    <>
-      <section className="w-full px-4">
-        {/* Shared Container */}
-        <div className="max-w-md mx-auto mt-10 space-y-6">
-          {/* Logo and CTA Buttons */}
-          <div className="text-center space-y-4">
-            <div className="text-blue-600 text-3xl font-bold">
-              <button className="cursor-pointer">NoTiCall</button>
-            </div>
+    <section className="w-full min-h-screen flex justify-center items-center bg-muted px-4">
+      <Card className="w-full max-w-md shadow-md">
+        <CardHeader>
+          <CardTitle className="text-center text-3xl text-blue-600 font-bold">
+            NoTiCall
+          </CardTitle>
+          <CardDescription className="text-center">
+            Welcome back! Log in to continue.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* CTA Buttons */}
+          <div className="space-y-2">
             <Button variant="blueButton" className="w-full">
               Get Started
             </Button>
@@ -40,10 +55,9 @@ function Login() {
             </Button>
           </div>
 
-          {/* Sign up Form */}
+          {/* Login Form */}
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Email */}
               <FormField
                 name="email"
                 render={() => (
@@ -61,7 +75,6 @@ function Login() {
                 )}
               />
 
-              {/* Password */}
               <FormField
                 name="password"
                 render={() => (
@@ -78,25 +91,28 @@ function Login() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full cursor-pointer">
+
+              <Button type="submit" className="w-full">
                 Log in
               </Button>
             </form>
           </Form>
-          {/* other */}
-          <div className="text-lg flex justify-center items-center space-x-2">
-            <span>Do not have an account?</span>
+
+          {/* Signup Redirect */}
+          <div className="text-sm text-center">
+            <span>Don’t have an account? </span>
             <Button
               variant="link"
-              className="text-blue cursor-pointer"
               onClick={() => navigate("/signup")}
+              className="text-blue-600"
             >
               Sign up
             </Button>
           </div>
-        </div>
-      </section>
-    </>
+        </CardContent>
+      </Card>
+    </section>
   );
 }
+
 export default Login;

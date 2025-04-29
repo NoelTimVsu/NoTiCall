@@ -10,6 +10,7 @@ import Navbar from "./pages/navbar";
 import State from "./pages/signup";
 import Login from "./pages/login";
 import { AnimatePresence, motion } from "framer-motion";
+import Profile from "./pages/profile";
 
 function App() {
   const location = useLocation();
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/signup" element={<State />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </motion.div>
   );

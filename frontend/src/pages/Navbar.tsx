@@ -13,7 +13,10 @@ const Navbar = () => {
       <div className="flex items-center gap-4">
         <Bell className="w-6 h-6 text-white hover:text-blue cursor-pointer" />
         <MessageCircle className="w-6 h-6 text-white hover:text-blue cursor-pointer" />
-        <User className="w-6 h-6 text-white hover:text-blue cursor-pointer" />
+        <User
+          onClick={() => navigate("/profile")}
+          className="w-6 h-6 text-white hover:text-blue cursor-pointer"
+        />
       </div>
     </nav>
   );
