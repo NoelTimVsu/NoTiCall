@@ -66,7 +66,9 @@ function HomePage() {
         {/* 3rd section */}
         <section className="p-10 flex flex-col justify-center items-center gap-6 bg-gray-800 w-full shadow-2xl">
           <Button variant="blueButton" size="xl">
-            <span className="text-xl">Get Started</span>
+            <span onClick={() => navigate("/signup")} className="text-xl">
+              Get Started
+            </span>
           </Button>
         </section>
       </div>

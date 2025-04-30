@@ -87,7 +87,7 @@ const Profile = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full cursor-pointer">
                 Update Profile
               </Button>
             </form>

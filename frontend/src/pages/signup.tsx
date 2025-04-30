@@ -47,7 +47,11 @@ function Signup() {
         <CardContent className="space-y-6">
           {/* CTA Buttons */}
           <div className="space-y-2">
-            <Button variant="blueButton" className="w-full">
+            <Button
+              onClick={() => navigate("/signup")}
+              variant="blueButton"
+              className="w-full"
+            >
               Get Started
             </Button>
             <Button variant="outline" className="w-full">
@@ -130,7 +134,11 @@ function Signup() {
           {/* Login Link */}
           <div className="text-sm text-center">
             <span>Already have an account? </span>
-            <Button variant="link" onClick={() => navigate("/login")}>
+            <Button
+              variant="link"
+              onClick={() => navigate("/login")}
+              className="text-blue-600 cursor-pointer"
+            >
               Log in
             </Button>
           </div>
