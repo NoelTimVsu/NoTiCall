@@ -45,20 +45,6 @@ function Login() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* CTA Buttons */}
-          <div className="space-y-2">
-            <Button
-              onClick={() => navigate("/signup")}
-              variant="blueButton"
-              className="w-full"
-            >
-              Get Started
-            </Button>
-            <Button variant="outline" className="w-full">
-              Create Free Account
-            </Button>
-          </div>
-
           {/* Login Form */}
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
