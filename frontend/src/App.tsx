@@ -5,12 +5,12 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import HomePage from "./pages/landing";
-import Navbar from "./pages/navbar";
-import State from "./pages/signup";
-import Login from "./pages/login";
+import HomePage from "./pages/Landing";
+import Navbar from "./pages/Navbar";
+import State from "./pages/Signup";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import { AnimatePresence, motion } from "framer-motion";
-import Profile from "./pages/profile";
 
 function App() {
   const location = useLocation();
