@@ -19,7 +19,7 @@ export const useUserStore = create<UserState>((set, get) => {
       try {
         const { id, ...payload } = updateProfile;
         await axiosInstance.put(`/users/${updateProfile.id}`, payload);
-        useAuthStore.getState().checkAuth();
+        useAuthStore.getState().verifyAuth();
         toast.success("Profile updated successfully");
       } catch(error) {
         toast.error(error.response.data.message);

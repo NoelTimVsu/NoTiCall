@@ -10,7 +10,7 @@ interface AuthState {
   isSigningUp: boolean;
   isCheckingAuth: boolean;
 
-  checkAuth: () => void;
+  verifyAuth: () => void;
   signUp: (data: SingUpData) => void;
   signIn: (data: SingInData) => void;
   logOut: () => void;
@@ -24,10 +24,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
     isLoggingIn: false,
     isCheckingAuth: false,
 
-    checkAuth: async () => {
+    verifyAuth: async () => {
       set({isCheckingAuth: true});
       try {
-        const response = await axiosInstance.get("/auth/check");
+        const response = await axiosInstance.get("/auth/verify");
         set({authUser: response.data, isLoggedIn: true});
       } catch(error) {
         console.log("Error checking auth", error);
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try{
         await axiosInstance.post("/auth/signup", data);
         toast.success("Account created successfully");
-        get().checkAuth();
+        get().verifyAuth();
       } catch(error) {
         toast.error(error.response.data.message);
       } finally {
@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         await axiosInstance.post("/auth/singin", data);
         toast.success("Logged in successfully");
-        get().checkAuth();
+        get().verifyAuth();
       } catch (error) {
         toast.error(error.response.data.message);
       } finally {

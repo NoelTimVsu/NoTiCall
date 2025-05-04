@@ -22,7 +22,7 @@ export class AuthController {
 
   @UseGuards(JwtCookieGuard)
   @HttpCode(HttpStatus.OK)
-  @Get('check')
+  @Get('verify')
   checkAuth(@GetUser() user: User) {
     return user;
   }

@@ -18,11 +18,11 @@ import { useAuthStore } from '@/store/useAuthStore.ts';
 
 function App() {
   const location = useLocation();
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser, verifyAuth, isCheckingAuth } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    verifyAuth();
+  }, [verifyAuth]);
 
   if(isCheckingAuth && !authUser) {
     return (
