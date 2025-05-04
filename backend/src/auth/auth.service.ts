@@ -26,7 +26,7 @@ export class AuthService {
           password_hash: passwordHash,
         },
       });
-      await this.getTokens(newUser);
+      return await this.getTokens(newUser);
     } catch (error) {
       console.log(error);
       throw error;

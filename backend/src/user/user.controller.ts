@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { UserService } from './user.service';
-import { UserDto } from './user.dto';
+import { UserDto } from './dto/user.dto';
 import { JwtCookieGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
+import { UserUpdateDto } from 'src/user/dto/user.update.dto';
 
 @UseGuards(JwtCookieGuard)
 @Controller('users')
@@ -29,7 +30,7 @@ export class UserController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: UserDto) {
+  update(@Param('id') id: string, @Body() data: UserUpdateDto) {
     return this.userService.update(Number(id), data);
   }
 
