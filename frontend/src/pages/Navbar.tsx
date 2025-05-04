@@ -1,18 +1,22 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Bell, CalendarDays, MessageCircle, User } from "lucide-react";
+import { Bell, MessageCircle, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   return (
-    <nav className="w-full flex items-center justify-between p-4 shadow-md bg-white">
-      <div className="text-2xl font-bold text-blue-600">NoTiCall</div>
+    <nav className="top-0 sticky z-20 w-full flex items-center justify-between p-4 shadow-lg bg-gray/90 px-20">
+      <div className="text-3xl font-bold text-blue">
+        <button onClick={() => navigate("/home")} className="cursor-pointer">
+          NoTiCall
+        </button>
+      </div>
       <div className="flex items-center gap-4">
-        <Button variant="outline">Create Meeting</Button>
-        <Button variant="outline">Join Meeting</Button>
-        <CalendarDays className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />
-        <Bell className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />
-        <MessageCircle className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />
-        <User className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />
+        <Bell className="w-6 h-6 text-white hover:text-blue cursor-pointer" />
+        <MessageCircle className="w-6 h-6 text-white hover:text-blue cursor-pointer" />
+        <User
+          onClick={() => navigate("/profile")}
+          className="w-6 h-6 text-white hover:text-blue cursor-pointer"
+        />
       </div>
     </nav>
   );
