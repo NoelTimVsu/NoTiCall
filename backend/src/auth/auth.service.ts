@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
@@ -27,8 +27,21 @@ export class AuthService {
         },
       });
       return await this.getTokens(newUser);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.code === 'P2002' && error.meta.target.includes('email')) {
+        throw new HttpException(
+          {
+            status: HttpStatus.CONFLICT,
+            error: 'Email or username already exists',
+            message: 'Email or username already exists',
+          },
+          HttpStatus.CONFLICT,
+          {
+            cause: error,
+          },
+        );
+      }
+
       throw error;
     }
   }

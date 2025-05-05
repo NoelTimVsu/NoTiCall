@@ -3,9 +3,11 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -34,8 +36,8 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const tokens = await this.authService.signup(signupDto);
-    response.cookie('access_token', tokens.access_token);
-    response.cookie('refresh_token', tokens.refresh_token);
+    response.cookie('access_token', tokens?.access_token);
+    response.cookie('refresh_token', tokens?.refresh_token);
     return;
   }
 
