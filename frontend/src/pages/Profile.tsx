@@ -15,19 +15,38 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useFormValidation } from "@/hooks/useFormValidation";
+import { useUpdateProfileFormValidation } from "@/hooks/useFormValidation";
+import { useAuthStore } from '@/store/useAuthStore.ts';
+import { useEffect } from 'react';
+import { useUserStore } from '@/store/useUserStore.ts';
+import { UpdateProfileData } from '@/validations/formValidation.ts';
 
 const Profile = () => {
-  const form = useFormValidation();
+  const form = useUpdateProfileFormValidation();
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = form;
+  const { authUser } = useAuthStore();
+  const { updateProfile } = useUserStore();
 
-  const onSubmit = (values: unknown) => {
-    console.log(values);
+  const onSubmit = (values: UpdateProfileData) => {
+    updateProfile({
+      ...values,
+      id: authUser?.id || ''
+    });
+    reset();
   };
+
+  useEffect(() => {
+    if(authUser) {
+      reset({
+        ...authUser,
+      });
+    }
+  }, [authUser, reset]);
 
   return (
     <section className="flex justify-center py-12">
@@ -39,48 +58,51 @@ const Profile = () => {
         <CardContent>
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 rounded-full border-2 bg-white flex items-center justify-center text-lg font-bold">
-              ME
+              { authUser ? authUser.username.toUpperCase().slice(0, 2) : "ME" }
             </div>
           </div>
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <FormField
-                name="fullName"
-                render={() => (
+                control={control}
+                name="full_name"
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Full Name"
-                        {...register("fullName")}
+                        placeholder={authUser?.full_name}
+                        {...field}
                       />
                     </FormControl>
-                    <FormMessage>{errors.fullName?.message}</FormMessage>
+                    <FormMessage>{errors.full_name?.message}</FormMessage>
                   </FormItem>
                 )}
               />
               <FormField
+                control={control}
                 name="username"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Username" {...register("username")} />
+                      <Input placeholder={authUser?.username} {...field} />
                     </FormControl>
                     <FormMessage>{errors.username?.message}</FormMessage>
                   </FormItem>
                 )}
               />
               <FormField
+                control={control}
                 name="email"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="Email"
-                        {...register("email")}
+                        placeholder={authUser?.email}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage>{errors.email?.message}</FormMessage>

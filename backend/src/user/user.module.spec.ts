@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { UserDto } from './user.dto';
+import { UserDto } from './dto/user.dto';
 import { User } from '@prisma/client';
 
 describe('UserController', () => {

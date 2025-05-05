@@ -1,15 +1,13 @@
-// src/user/dto/create-user.dto.ts
 import { IsString, IsOptional, IsEmail } from 'class-validator';
 
-export class UserDto {
+export class UserUpdateDto {
+  @IsOptional()
   @IsString()
   username: string;
 
+  @IsOptional()
   @IsEmail()
   email: string;
-
-  @IsString()
-  password_hash: string;
 
   @IsOptional()
   @IsString()
@@ -18,10 +16,4 @@ export class UserDto {
   @IsOptional()
   @IsString()
   profile_pic?: string;
-
-  @IsOptional()
-  created_at?: Date;
-
-  @IsOptional()
-  updated_at?: Date;
 }

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { useFormValidation } from "@/hooks/useFormValidation";
+import { useSignUpFormValidation } from "@/hooks/useFormValidation";
 import {
   Card,
   CardContent,
@@ -17,23 +17,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuthStore } from '@/store/useAuthStore.ts';
+import { SingUpData } from '@/validations/formValidation.ts';
+import { Loader } from 'lucide-react';
 
 function Signup() {
-  const form = useFormValidation();
+  const form = useSignUpFormValidation();
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = form;
+  const { signUp, isSigningUp } = useAuthStore();
 
   const navigate = useNavigate();
 
-  const onSubmit = (values: unknown) => {
-    console.log(values);
+  const onSubmit = (values: SingUpData) => {
+    signUp(values);
+    reset();
   };
 
   return (
-    <section className="w-full min-h-screen flex justify-center items-center bg-muted px-4">
+    <section className="w-full min-h-[calc(100vh-70px)] flex justify-center items-center bg-muted px-4">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader>
           <CardTitle className="text-center text-3xl text-blue-600 font-bold">
@@ -49,28 +55,30 @@ function Signup() {
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <FormField
-                name="fullName"
-                render={() => (
+                control={control}
+                name="full_name"
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Full Name"
-                        {...register("fullName")}
+                        {...field}
                       />
                     </FormControl>
-                    <FormMessage>{errors.fullName?.message}</FormMessage>
+                    <FormMessage>{errors.full_name?.message}</FormMessage>
                   </FormItem>
                 )}
               />
 
               <FormField
+                control={control}
                 name="username"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Username" {...register("username")} />
+                      <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage>{errors.username?.message}</FormMessage>
                   </FormItem>
@@ -78,15 +86,16 @@ function Signup() {
               />
 
               <FormField
+                control={control}
                 name="email"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="Email"
-                        {...register("email")}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage>{errors.email?.message}</FormMessage>
@@ -95,15 +104,16 @@ function Signup() {
               />
 
               <FormField
+                control={control}
                 name="password"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="Password"
-                        {...register("password")}
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage>{errors.password?.message}</FormMessage>
@@ -111,8 +121,8 @@ function Signup() {
                 )}
               />
 
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isSigningUp}>
+                {isSigningUp ? <Loader className="size-6 animate-spin" /> : 'Create Account'}
               </Button>
             </form>
           </Form>

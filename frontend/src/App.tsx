@@ -1,19 +1,36 @@
+import { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
-  useLocation,
-} from "react-router-dom";
+  useLocation, Outlet,
+} from 'react-router-dom';
+import { Loader } from "lucide-react";
+import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/Landing";
 import Navbar from "./pages/Navbar";
-import State from "./pages/Signup";
+import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuthStore } from '@/store/useAuthStore.ts';
 
 function App() {
   const location = useLocation();
+  const { authUser, verifyAuth, isCheckingAuth } = useAuthStore();
+
+  useEffect(() => {
+    verifyAuth();
+  }, [verifyAuth]);
+
+  if(isCheckingAuth && !authUser) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <motion.div
@@ -24,12 +41,19 @@ function App() {
       transition={{ duration: 0.5 }}
     >
       <Routes location={location} key={location.pathname}>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/signup" element={<State />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route element={<PublicRoutes />}>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
+
+      <Toaster />
     </motion.div>
   );
 }
@@ -43,6 +67,20 @@ function Root() {
       </AnimatePresence>
     </Router>
   );
+}
+
+function PublicRoutes() {
+  const { isLoggedIn } = useAuthStore();
+  useEffect(() => {
+  }, [isLoggedIn]);
+  return isLoggedIn ? <Navigate to="/profile" replace /> : <Outlet />;
+}
+
+function ProtectedRoute() {
+  const { isLoggedIn } = useAuthStore();
+  useEffect(() => {
+  }, [isLoggedIn]);
+  return isLoggedIn ? <Outlet /> : <Navigate to="/" replace />;
 }
 
 export default Root;
