@@ -9,10 +9,11 @@ import {
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/Landing";
-import Navbar from "./pages/Navbar";
+import Navbar from "./components/Navbar.tsx";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Chat from "./pages/Chat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthStore } from '@/store/useAuthStore.ts';
 
@@ -49,6 +50,7 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/chat" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
@@ -73,7 +75,7 @@ function PublicRoutes() {
   const { isLoggedIn } = useAuthStore();
   useEffect(() => {
   }, [isLoggedIn]);
-  return isLoggedIn ? <Navigate to="/profile" replace /> : <Outlet />;
+  return isLoggedIn ? <Navigate to="/chat" replace /> : <Outlet />;
 }
 
 function ProtectedRoute() {

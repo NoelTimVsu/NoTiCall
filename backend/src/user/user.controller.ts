@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { UserService } from './user.service';
-import { UserDto } from './dto/user.dto';
 import { JwtCookieGuard } from 'src/auth/guard';
 import { GetUser } from 'src/auth/decorator';
 import { UserUpdateDto } from 'src/user/dto/user.update.dto';
@@ -22,6 +21,11 @@ export class UserController {
   @Get()
   getMe(@GetUser() user: User) {
     return user;
+  }
+
+  @Get('friends')
+  getFriends(@GetUser() user: User) {
+    return this.userService.getFriends(Number(user.id));
   }
 
   @Get(':id')

@@ -32,4 +32,26 @@ export class UserService {
   async delete(id: number) {
     return this.prisma.user.delete({ where: { id } });
   }
+
+  async getFriends(id: number) {
+    const friendships = await this.prisma.friendShip.findMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [{ user_id: id }, { friend_id: id }],
+      },
+      include: {
+        user: true,
+        friend: true,
+      },
+    });
+
+    // only return friends, not myself
+    return friendships.map((f) => {
+      const user = f.user_id === id ? f.friend : f.user;
+
+      // omit password_hash from the user object
+      const { password_hash, ...safeUser } = user;
+      return safeUser;
+    });
+  }
 }

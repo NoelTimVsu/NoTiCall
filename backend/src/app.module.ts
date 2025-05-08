@@ -7,6 +7,12 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { UserController } from 'src/user/user.controller';
 import { UserService } from 'src/user/user.service';
+import { MessageModule } from './message/message.module';
+import { ChatModule } from 'src/sockets/chat/chat.module';
+import { MessageController } from 'src/message/message.controller';
+import { MessageService } from 'src/message/message.service';
+import { ChatService } from 'src/sockets/chat/chat.service';
+import { ChatGateway } from 'src/sockets/chat/chat.gateway';
 
 @Module({
   imports: [
@@ -16,8 +22,17 @@ import { UserService } from 'src/user/user.service';
     PrismaModule,
     UserModule,
     AuthModule,
+    MessageModule,
+    ChatModule,
+    ChatModule,
   ],
-  controllers: [AppController, UserController],
-  providers: [AppService, UserService],
+  controllers: [AppController, UserController, MessageController],
+  providers: [
+    AppService,
+    UserService,
+    MessageService,
+    ChatService,
+    ChatGateway,
+  ],
 })
 export class AppModule {}

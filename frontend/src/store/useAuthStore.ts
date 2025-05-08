@@ -2,9 +2,10 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import {axiosInstance} from "../lib/axios.js";
 import { SingInData, SingUpData } from '@/validations/formValidation.ts';
+import { useSocketStore } from '@/store/useSocketStore.ts';
 
 interface AuthState {
-  authUser: { id: string; email: string; full_name: string; username: string; profile_pic: string; } | null;
+  authUser: { id: number; email: string; full_name: string; username: string; profile_pic: string; } | null;
   isLoggedIn: boolean;
   isLoggingIn: boolean;
   isSigningUp: boolean;
@@ -29,9 +30,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         const response = await axiosInstance.get("/auth/verify");
         set({authUser: response.data, isLoggedIn: true});
+        useSocketStore.getState().connectToSocket();
       } catch(error) {
         console.log("Error checking auth", error);
         set({authUser: null});
+        get().logOut();
       } finally {
         set({isCheckingAuth: false});
       }
@@ -65,6 +68,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         await axiosInstance.post("/auth/logout");
         set({authUser: null, isLoggedIn: false});
         toast.success("Logged out successfully");
+        useSocketStore.getState().disconnectFromSocket();
       } catch (error) {
         toast.error(error.response.data.message);
       }
