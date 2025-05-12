@@ -50,8 +50,8 @@ model ChatRoomMember {
   chat_room_id Int
   user_id      Int
   joined_at    DateTime? @default(now())
+  role         Role @default(USER)
 
-  // Relations
   chatRoom ChatRoom @relation("ChatRoomMembers", fields: [chat_room_id], references: [id])
   user     User     @relation("UserChatRoomMemberships", fields: [user_id], references: [id])
 
@@ -102,4 +102,9 @@ enum Status {
   PENDING
   ACCEPTED
   BLOCKED
+}
+
+enum Role {
+  ADMIN
+  USER
 }

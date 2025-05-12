@@ -13,6 +13,12 @@ import { MessageController } from 'src/message/message.controller';
 import { MessageService } from 'src/message/message.service';
 import { ChatService } from 'src/sockets/chat/chat.service';
 import { ChatGateway } from 'src/sockets/chat/chat.gateway';
+import { ChatRoomModule } from 'src/chat-room/chat-room.module';
+import { ChatRoomService } from 'src/chat-room/chat-room.service';
+import { ChatRoomController } from 'src/chat-room/chat-room.controller';
+import { ChatRoomMessageModule } from './chat-room-message/chat-room-message.module';
+import { ChatRoomMessageService } from './chat-room-message/chat-room-message.service';
+import { ChatRoomMessageController } from './chat-room-message/chat-room-message.controller';
 
 @Module({
   imports: [
@@ -25,14 +31,24 @@ import { ChatGateway } from 'src/sockets/chat/chat.gateway';
     MessageModule,
     ChatModule,
     ChatModule,
+    ChatRoomModule,
+    ChatRoomMessageModule,
   ],
-  controllers: [AppController, UserController, MessageController],
+  controllers: [
+    AppController,
+    UserController,
+    MessageController,
+    ChatRoomController,
+    ChatRoomMessageController,
+  ],
   providers: [
     AppService,
     UserService,
     MessageService,
     ChatService,
     ChatGateway,
+    ChatRoomService,
+    ChatRoomMessageService,
   ],
 })
 export class AppModule {}

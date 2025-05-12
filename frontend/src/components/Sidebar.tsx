@@ -1,30 +1,85 @@
-import {useEffect, useState} from "react";
-import {Users} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import { useEffect, useState } from 'react';
+import { MoreHorizontal, Plus, Users, X } from 'lucide-react';
 import { useChatStore, User } from '../store/useChatStore.js';
-import SidebarSkeleton from "./skeletons/SidebarSkeleton.tsx";
+import SidebarSkeleton from './skeletons/SidebarSkeleton.tsx';
 import { AvatarFallback, AvatarImage, Avatar } from '@radix-ui/react-avatar';
 import { useSocketStore } from '@/store/useSocketStore.ts';
+import CreateGroupModal from './GroupModalPopUp.tsx';
+import GroupAvatar from './GroupAvatar.tsx';
+import { useChatRoomStore, Group } from '@/store/useChatRoomStore.ts';
+import { useAuthStore } from '@/store/useAuthStore.ts';
+import toast from 'react-hot-toast';
 
 function Sidebar() {
   const { getFriends, setSelectedUser, selectedUser, friends, isUsersLoading } = useChatStore();
   const { onlineUsers } = useSocketStore();
-
+  const [showGroupModal, setShowGroupModal] = useState(false);
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const { groups, getGroups, isLoading: isGroupsLoading, deleteGroupChat } = useChatRoomStore();
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const authUser = useAuthStore.getState().authUser;
 
   useEffect(() => {
     getFriends();
-  }, [getFriends]);
+    getGroups();
+  }, [getFriends, getGroups]);
 
-  const filteredUsers = showOnlineOnly ? friends.filter(friend => onlineUsers.includes(String(friend.id))) : friends;
+  const deleteGroup = (group: Group) => {
+    if (!authUser) {
+      toast.error('You must be logged in to delete a group.');
+      return;
+    }
+    deleteGroupChat({
+      chat_room_id: group.id,
+      user_id: authUser.id,
+    });
+    setSelectedUser(undefined); // not working at this moment, will research more
+  };
+  const checkAnyOnlineUser = (group: Group) => {
+    if (!group?.members || !Array.isArray(group.members)) return false;
+    return group.members.some(
+      member => member?.user?.id !== authUser?.id && onlineUsers.includes(String(member?.user?.id)),
+    );
+  };
 
-  if(isUsersLoading) return <SidebarSkeleton />
+  const filteredUsers = showOnlineOnly
+    ? friends.filter(friend => onlineUsers.includes(String(friend.id)))
+    : friends;
+
+  if (isUsersLoading || isGroupsLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full w-36 md:w-60 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
+          {/* The button to create a group */}
+          <button
+            onClick={() => setShowGroupModal(true)}
+            title="Create Group"
+            className="p-2 rounded-full hover:bg-gray-200 transition"
+          >
+            <Plus className="w-5 h-5 text-blue-500" />
+          </button>
         </div>
 
         <div className="mt-3 hidden lg:flex items-center gap-2">
@@ -32,7 +87,7 @@ function Sidebar() {
             <input
               type="checkbox"
               checked={showOnlineOnly}
-              onChange={() => setShowOnlineOnly((prev) => !prev)}
+              onChange={() => setShowOnlineOnly(prev => !prev)}
               className="checkbox checkbox-sm"
             />
             <span className="text-sm">Show online only</span>
@@ -45,12 +100,12 @@ function Sidebar() {
           <button
             key={friend.id}
             onClick={() => setSelectedUser(friend)}
-            className={`w-full p-3 flex items-center gap-3 hover:bg-blue-50 transition-colors ${selectedUser?.id === friend.id ? "bg-base-300" : ""}`}
+            className={`w-full p-3 flex items-center gap-3 hover:bg-blue-50 transition-colors ${selectedUser?.id === friend.id ? 'bg-base-300' : ''}`}
           >
             <div className="relative mx-auto lg:mx-0">
               <Avatar className="w-8 h-8 rounded-full border-2 p-2">
-                <AvatarImage src={friend.profile_pic} />
-                <AvatarFallback>{friend.username.slice(0,2).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={friend.profile_pic || '/default-avatar.png'} />
+                <AvatarFallback>{friend.username.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               {onlineUsers.includes(String(friend.id)) && (
                 <span className="absolute bottom-[-8px] right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
@@ -60,7 +115,7 @@ function Sidebar() {
             <div className="hidden lg:block text-left min-w-0">
               <div className="font-medium truncate">{friend.full_name}</div>
               <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(String(friend.id)) ? "Online" : "Offline"}
+                {onlineUsers.includes(String(friend.id)) ? 'Online' : 'Offline'}
               </div>
             </div>
           </button>
@@ -69,9 +124,113 @@ function Sidebar() {
         {filteredUsers.length === 0 && (
           <div className="text-center text-zinc-500 py-4">No online users</div>
         )}
+
+        {/* dislay group */}
+        {groups.map(group => (
+          <div
+            key={group.id}
+            className={`relative group w-full p-4 flex flex-col gap-2 hover:bg-blue-50 transition-colors text-left ${
+              selectedUser?.id === group.id ? 'bg-base-300' : ''
+            }`}
+          >
+            <button
+              onClick={() =>
+                setSelectedUser({
+                  id: group.id,
+                  name: group.name,
+                  members: group.members,
+                })
+              }
+              className="relative w-full text-left px-3 py-2 hover:bg-zinc-100 rounded-lg transition"
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-medium text-gray-700 text-center">{group.name}</h3>
+
+                {/* Ellipsis Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="text-gray-500 hover:text-black p-1">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onSelect={() => setEditingGroup(group)}
+                      className="cursor-pointer"
+                    >
+                      Edit Group
+                    </DropdownMenuItem>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem
+                          onSelect={e => e.preventDefault()}
+                          className="text-red-600"
+                        >
+                          Delete Group
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Group?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete <strong>{group.name}</strong>? This
+                            action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-red-600 hover:bg-red-700 text-white my-2"
+                            onClick={() => deleteGroup(group)}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Avatar */}
+              <GroupAvatar members={group.members.map(m => m.user)} />
+
+              {/* Status Pill */}
+              <div className="hidden lg:flex mt-2">
+                <span
+                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${checkAnyOnlineUser(group) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                >
+                  {checkAnyOnlineUser(group) ? 'Online' : 'Offline'}
+                </span>
+              </div>
+            </button>
+          </div>
+        ))}
+
+        {/* When group is created in modal: */}
+        {showGroupModal && (
+          <CreateGroupModal
+            onClose={() => setShowGroupModal(false)}
+            onGroupCreate={() => {
+              setShowGroupModal(false);
+            }}
+            typeOfModal="create"
+          />
+        )}
+
+        {editingGroup && (
+          <CreateGroupModal
+            group={editingGroup}
+            onClose={() => setEditingGroup(null)}
+            onGroupCreate={() => {
+              setEditingGroup(null);
+            }}
+            typeOfModal="edit"
+          />
+        )}
       </div>
     </aside>
-  )
+  );
 }
 
 export default Sidebar;

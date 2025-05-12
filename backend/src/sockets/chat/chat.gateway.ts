@@ -19,15 +19,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   connectedUsers: Map<string, string>;
+  private userSockets: Map<number, Socket>;
 
   constructor() {
     this.connectedUsers = new Map<string, string>();
+    this.userSockets = new Map<number, Socket>();
+  }
+
+  getSocketByUserId(userId: number): Socket | undefined {
+    return this.userSockets.get(userId);
   }
 
   handleConnection(client: Socket) {
     const connectedUser = client.handshake.query.userId as unknown as string;
     if (connectedUser && connectedUser !== '') {
       this.connectedUsers.set(connectedUser, client.id);
+      this.userSockets.set(Number(connectedUser), client);
 
       this.server.emit(
         'get-online-users',
@@ -40,6 +47,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const connectedUser = client.handshake.query.userId as unknown as string;
 
     this.connectedUsers.delete(connectedUser);
+    this.userSockets.delete(Number(connectedUser));
+
     this.server.emit(
       'get-online-users',
       Array.from(this.connectedUsers.keys()),
