@@ -37,7 +37,7 @@ function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: Create
     const value = e.target.value;
     setGroupName(value);
     if (group) {
-      setGroupNameChange(group.name !== value);
+      setGroupNameChange(group.name.trim() !== value.trim());
     } else {
       setGroupNameChange(value.trim().length > 0);
     }
@@ -113,7 +113,7 @@ function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: Create
 
   const isEdit = typeOfModal === 'edit';
   const isDisabled = isEdit
-    ? selectedUsers.length === 1
+    ? selectedUsers.length === 1 || (disableUpdate && !groupNameChange)
     : selectedUsers.length === 0 || (disableUpdate && !groupNameChange);
 
   const buttonClass = isDisabled
