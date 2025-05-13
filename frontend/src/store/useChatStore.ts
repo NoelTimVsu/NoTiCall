@@ -1,8 +1,9 @@
-import { create } from "zustand";
-import toast from "react-hot-toast";
-import { axiosInstance } from "../lib/axios.js";
+import { create } from 'zustand';
+import toast from 'react-hot-toast';
+import { axiosInstance } from '../lib/axios.js';
 import { useSocketStore } from '@/store/useSocketStore.ts';
 import { useAuthStore } from '@/store/useAuthStore.ts';
+import { Group } from '@/store/useChatRoomStore.js';
 
 export interface User {
   id: number;
@@ -19,84 +20,107 @@ export interface Message {
   sender_id: number;
   image: string;
   created_at: string;
+  sender?: User;
 }
+
+export type ChatParticipant = User | Group;
+
+const isUser = (participant: ChatParticipant): participant is User => {
+  return (participant as User).email !== undefined;
+};
 
 export interface ChatState {
   messages: Message[];
   friends: User[];
-  selectedUser: User | undefined;
+  selectedUser: ChatParticipant | undefined;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
 
   getFriends: () => Promise<void>;
-  getMessages: (userId: number | undefined) => Promise<void>;
-  setSelectedUser: (user: User | undefined) => void;
-  sendMessage: (messageData: { content: string }) => Promise<void>;
+  getMessages: (participant: ChatParticipant | undefined) => Promise<void>;
+  setSelectedUser: (participant: ChatParticipant | undefined) => void;
+  sendMessage: (messageData: { content: string; image?: string }) => Promise<void>;
   subscribeToMessages: () => void;
   unsubscribeFromMessages: () => void;
 }
 
-export const useChatStore = create<ChatState>((set, get) => {
-  return {
-    messages: [],
-    friends: [],
-    selectedUser: undefined,
-    isUsersLoading: false,
-    isMessagesLoading: false,
+export const useChatStore = create<ChatState>((set, get) => ({
+  messages: [],
+  friends: [],
+  selectedUser: undefined,
+  isUsersLoading: false,
+  isMessagesLoading: false,
 
-    getFriends: async () => {
-      set({isUsersLoading: true});
-      try {
-        const response = await axiosInstance.get("/users/friends");
-        set({friends: response.data});
-      } catch (error) {
-        toast.error(error.response.data.message);
-        useAuthStore.getState().logOut();
-      } finally {
-        set({isUsersLoading: false});
-      }
-    },
-    getMessages: async (receiverId: number | undefined) => {
-      set({isMessagesLoading: true});
-      try {
-        const response = await axiosInstance.get(`/messages/${receiverId}`);
-        set({messages: response.data});
-      } catch (error) {
-        toast.error(error.response.data.message);
-        useAuthStore.getState().logOut();
-      } finally {
-        set({isMessagesLoading: false});
-      }
-    },
-    setSelectedUser: (selectedUser: User | undefined) => set({selectedUser}),
-    sendMessage: async (messageData: { content: string }) => {
-      const { selectedUser, messages } = get();
-      try {
-        const response = await axiosInstance.post(`/messages/send/${selectedUser?.id}`, messageData);
-        set({messages: [...messages, response.data]});
-      } catch (error) {
-        toast.error(error.response.data.message);
-      }
-      console.log(messageData);
-    },
-    subscribeToMessages: () => {
-      const { selectedUser } = get();
-      if (!selectedUser) return;
-
-      const socket = useSocketStore.getState().socket;
-      if(!socket?.connected) return;
-
-      socket.on('new-message', (newMessage: Message) => {
-        const isMessageSentFromSelectedUser = newMessage.sender_id === selectedUser.id;
-        if(!isMessageSentFromSelectedUser) return;
-        set({messages: [...get().messages, newMessage]});
-      });
-    },
-    unsubscribeFromMessages: () => {
-      const socket = useSocketStore.getState().socket;
-      if(!socket?.connected) return;
-
-      socket.off('new-message');
+  getFriends: async () => {
+    set({ isUsersLoading: true });
+    try {
+      const response = await axiosInstance.get('/users/friends');
+      set({ friends: response.data });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to fetch friends');
+      useAuthStore.getState().logOut();
+    } finally {
+      set({ isUsersLoading: false });
     }
-  }
-});
+  },
+
+  getMessages: async (participant: ChatParticipant | undefined) => {
+    if (!participant) return;
+    set({ isMessagesLoading: true });
+    try {
+      const endpoint = isUser(participant)
+        ? `/messages/${participant.id}`
+        : `/chat-room-messages/${participant.id}`;
+      const response = await axiosInstance.get(endpoint);
+      set({ messages: response.data });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to fetch messages');
+      useAuthStore.getState().logOut();
+    } finally {
+      set({ isMessagesLoading: false });
+    }
+  },
+
+  setSelectedUser: selectedUser => {
+    set({ selectedUser });
+    const socket = useSocketStore.getState().socket;
+    if (socket?.connected && selectedUser && !isUser(selectedUser)) {
+      const roomId = selectedUser.id;
+      socket.emit('join-room', roomId);
+      console.log(`Emitted join-room for chat-room-${roomId}`);
+    }
+  },
+
+  sendMessage: async messageData => {
+    const { selectedUser, messages } = get();
+    const currentUser = useAuthStore.getState().authUser;
+    if (!selectedUser || !currentUser) return;
+    try {
+      const endpoint = isUser(selectedUser)
+        ? `/messages/send/${selectedUser.id}`
+        : `/chat-room-messages/${selectedUser.id}/send/${currentUser.id}`;
+      const response = await axiosInstance.post(endpoint, messageData);
+      set({ messages: [...messages, response.data] });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to send message');
+    }
+  },
+
+  subscribeToMessages: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+    const socket = useSocketStore.getState().socket;
+    if (!socket?.connected) return;
+    const event = isUser(selectedUser) ? 'new-message' : 'chat-room:new-message';
+    socket.on(event, (newMessage: Message) => {
+      set({ messages: [...get().messages, newMessage] });
+    });
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useSocketStore.getState().socket;
+    if (!socket?.connected) return;
+    socket.off('new-message');
+    socket.off('chat-room:new-message');
+  },
+}));

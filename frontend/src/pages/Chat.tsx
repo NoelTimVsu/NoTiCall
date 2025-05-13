@@ -24,9 +24,7 @@ function NoChatSelected() {
 
         {/* Welcome Text */}
         <h2 className="text-2xl font-bold">Welcome to NoTiCall!</h2>
-        <p className="text-gray-500">
-          Select a conversation from the sidebar to start chatting
-        </p>
+        <p className="text-gray-500">Select a conversation from the sidebar to start chatting</p>
       </div>
     </div>
   );
@@ -36,36 +34,34 @@ function ChatContainer() {
   const messageContainerEndRef = useRef<HTMLDivElement>(null);
   const { subscribeToMessages, unsubscribeFromMessages } = useChatStore();
 
-  const {
-    messages,
-    getMessages,
-    isMessagesLoading,
-    selectedUser,
-  } = useChatStore();
+  const { messages, getMessages, isMessagesLoading, selectedUser } = useChatStore();
   const { authUser } = useAuthStore();
 
   useEffect(() => {
-    getMessages(selectedUser?.id);
+    getMessages(selectedUser);
+    console.log('messages: ', messages);
     subscribeToMessages();
 
     // cleanup function
-    return () => unsubscribeFromMessages();
-  }, [getMessages, selectedUser?.id, subscribeToMessages, unsubscribeFromMessages]);
+    return () => {
+      unsubscribeFromMessages();
+    };
+  }, [getMessages, selectedUser, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
-    if(messageContainerEndRef.current && messages.length > 0) {
-      messageContainerEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messageContainerEndRef.current && messages.length > 0) {
+      messageContainerEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  if(isMessagesLoading) {
+  if (isMessagesLoading) {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
       </div>
-    )
+    );
   }
 
   return (
@@ -75,24 +71,55 @@ function ChatContainer() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message: Message) => (
           <div
-            className={`chat ${message.sender_id === authUser?.id ? "chat-end" : "chat-start"}`}
+            className={`chat ${message.sender_id === authUser?.id ? 'chat-end' : 'chat-start'}`}
             key={message.id}
             ref={messageContainerEndRef}
           >
             <div className="chat-image avatar">
               <Avatar className="w-8 h-8 rounded-full border-2 p-2">
-                <AvatarImage src={message.sender_id === authUser?.id ? authUser?.profile_pic : selectedUser?.profile_pic} />
-                <AvatarFallback>{message.sender_id === authUser?.id ? authUser?.username.slice(0,2).toUpperCase() : selectedUser?.username.slice(0,2).toUpperCase()}</AvatarFallback>
+                <AvatarImage
+                  src={
+                    message.sender_id === authUser?.id
+                      ? authUser?.profile_pic
+                      : selectedUser && 'username' in selectedUser
+                        ? selectedUser.profile_pic
+                        : selectedUser && 'members' in selectedUser
+                          ? selectedUser.members.find(
+                              member => member.user.id === message.sender_id,
+                            )?.user.profile_pic
+                          : undefined
+                  }
+                />
+                <AvatarFallback>
+                  {message.sender_id === authUser?.id
+                    ? authUser?.username.slice(0, 2).toUpperCase()
+                    : selectedUser && 'username' in selectedUser
+                      ? selectedUser?.username.slice(0, 2).toUpperCase()
+                      : selectedUser && 'members' in selectedUser
+                        ? selectedUser.members
+                            .find(member => member.user.id === message.sender_id)
+                            ?.user.username.slice(0, 2)
+                            .toUpperCase()
+                        : undefined}
+                </AvatarFallback>
               </Avatar>
             </div>
 
             <div className="chat-header mb-1">
-              <time className="text-sm opacity-50 ml-1">{formatMessageTime(message.created_at)}</time>
+              <time className="text-sm opacity-50 ml-1">
+                {formatMessageTime(message.created_at)}
+              </time>
             </div>
 
-            <div className={`chat-bubble flex flex-col group ${message.sender_id === authUser?.id ? 'bg-blue-100' : 'bg-gray-200'}`}>
+            <div
+              className={`chat-bubble flex flex-col group ${message.sender_id === authUser?.id ? 'bg-blue-100' : 'bg-gray-200'}`}
+            >
               {message.image && (
-                <img src={message.image} alt="attachment" className="sm:max-w-[200px] rounded-md mb-2" />
+                <img
+                  src={message.image}
+                  alt="attachment"
+                  className="sm:max-w-[200px] rounded-md mb-2"
+                />
               )}
               {message.content && <MessageText message={message.content} />}
             </div>
@@ -105,7 +132,7 @@ function ChatContainer() {
   );
 }
 
-function MessageText({message}: { message: string }) {
+function MessageText({ message }: { message: string }) {
   const [originalMessage] = useState(message);
 
   return (
@@ -116,87 +143,116 @@ function MessageText({message}: { message: string }) {
 }
 
 function ChatHeader() {
-  const {selectedUser, setSelectedUser} = useChatStore();
+  const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useSocketStore();
+  const { authUser } = useAuthStore();
 
-  return <div className="p-2.5 border-b border-gray-300">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        {/* Avatar */}
-        <Avatar className="w-8 h-8 rounded-full border-2 p-2" >
-          <AvatarImage src={selectedUser?.profile_pic} />
-          <AvatarFallback>{selectedUser?.username.slice(0,2).toUpperCase()}</AvatarFallback>
-        </Avatar>
+  const checkAnyOnlineUser = () => {
+    if (!selectedUser) return false;
 
-        {/* User info */}
-        <div>
-          <h3 className="font-medium">{selectedUser?.full_name}</h3>
-          <p className="text-sm text-gray-400">
-            {onlineUsers.includes(String(selectedUser?.id)) ? "Online" : "Offline"}
-          </p>
+    // If selectedUser is an individual user
+    if ('username' in selectedUser) {
+      return onlineUsers.includes(String(selectedUser.id));
+    }
+
+    // If selectedUser is a group, check if any member is online. Group has status online if atleast 1 user online
+    if ('members' in selectedUser) {
+      return selectedUser.members.some(
+        member => member.user.id !== authUser?.id && onlineUsers.includes(String(member.user.id)),
+      );
+    }
+    return false;
+  };
+
+  return (
+    <div className="p-2.5 border-b border-gray-300">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <Avatar className="w-8 h-8 rounded-full border-2 p-2">
+            <AvatarImage
+              src={selectedUser && 'username' in selectedUser ? selectedUser.profile_pic : ''}
+            />
+            <AvatarFallback>
+              {selectedUser && 'username' in selectedUser
+                ? selectedUser?.username.slice(0, 2).toUpperCase()
+                : selectedUser?.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          {/* User info */}
+          <div>
+            <h3 className="font-medium">
+              {selectedUser && 'username' in selectedUser ? selectedUser?.full_name : ''}
+            </h3>
+            <p className="text-sm text-gray-400">{checkAnyOnlineUser() ? 'Online' : 'Offline'}</p>
+          </div>
         </div>
-      </div>
 
-      {/* Close btn */}
-      <button
-        onClick={() => setSelectedUser(undefined)}
-      >
-        <X />
-      </button>
+        {/* Close btn */}
+        <button onClick={() => setSelectedUser(undefined)}>
+          <X />
+        </button>
+      </div>
     </div>
-  </div>;
+  );
 }
 
 function MessageInput() {
   const { sendMessage } = useChatStore();
-  const [text, setText] = useState("");
-  const [imagePreview, setImagePreview] = useState("");
+  const [text, setText] = useState('');
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = async e => {
     e.preventDefault();
 
-    if(!text.trim() && !imagePreview) return;
+    if (!text.trim() && !imagePreview) return;
 
     try {
       await sendMessage({
         content: text.trim(),
-        // image: imagePreview,
+        image: imagePreview ? imagePreview : '',
       });
 
-      setText(() => "");
-      setImagePreview("");
-      if(fileInputRef.current) {
-        fileInputRef.current.value = "";
+      setText(() => '');
+      setImagePreview('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     } catch (error) {
-      toast.error("Failed to send a message");
-      console.log("Failed to send message:", error);
+      toast.error('Failed to send a message');
+      console.log('Failed to send message:', error);
     }
-  }
+  };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = e => {
     const file = e.target.files[0];
-    if(!file.type.startsWith("image/")) {
-      toast.error("Please select an image");
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image');
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result);
-    }
+      const result = reader.result;
+      if (typeof result === 'string') {
+        setImagePreview(result);
+      }
+      console.log('result ', result);
+      console.log('reader: ', reader);
+    };
     reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
-    setImagePreview("");
-    if(fileInputRef.current) {
-      fileInputRef.current.value = "";
+    setImagePreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const autoResize = (event) => {
+  const autoResize = event => {
     event.target.style.height = 'auto'; // Reset the height to auto
     event.target.style.height = `${event.target.scrollHeight}px`; // Set the height to fit content
   };
@@ -206,22 +262,23 @@ function MessageInput() {
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
-            <img src={imagePreview} alt="Preview" className="size-20 object-cover rounded-lg border border-zinc-700" />
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="size-20 object-cover rounded-lg border border-zinc-700"
+            />
             <button
               onClick={removeImage}
               className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-blue-300 flex items-center justify-center"
               type="button"
             >
-              <X  className="size-3"/>
+              <X className="size-3" />
             </button>
           </div>
         </div>
       )}
 
-      <form
-        onSubmit={handleSendMessage}
-        className="flex items-center gap-2"
-      >
+      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
           {/*Text message*/}
           <input
@@ -230,7 +287,7 @@ function MessageInput() {
             className="w-full input input-bordered rounded-lg input-sm sm:input-md resize-none leading-relaxed"
             placeholder="Type a message..."
             onInput={autoResize}
-            onChange={(e) => setText(e.target.value)}
+            onChange={e => setText(e.target.value)}
           />
 
           {/*/!*Image input*!/*/}
@@ -243,10 +300,10 @@ function MessageInput() {
           />
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle ${imagePreview ? "text-blue-500" : "text-zinc-400"}`}
+            className={`hidden sm:flex btn btn-circle ${imagePreview ? 'text-blue-500' : 'text-zinc-400'}`}
             onClick={() => fileInputRef.current?.click()}
           >
-            <Image size={20}/>
+            <Image size={20} />
           </button>
 
           {/* Send button */}
@@ -255,7 +312,7 @@ function MessageInput() {
             className="sm:flex btn btn-circle"
             disabled={!text.trim() && !imagePreview}
           >
-            <Send size={20}/>
+            <Send size={20} />
           </button>
         </div>
       </form>
@@ -278,7 +335,7 @@ function Chat() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default Chat;

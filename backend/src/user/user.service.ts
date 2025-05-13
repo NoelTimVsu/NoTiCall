@@ -54,4 +54,18 @@ export class UserService {
       return safeUser;
     });
   }
+
+  //get all users
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        full_name: true,
+        profile_pic: true,
+        created_at: true,
+      },
+    });
+  }
 }

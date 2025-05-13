@@ -13,4 +13,8 @@ export class ChatService {
   sendNewMessage(receiverId: string, message: Messages) {
     this.chatGateway.sendNewMessage(receiverId, message);
   }
+
+  emitToChatRoom(chatRoomId: string, payload: any) {
+    this.chatGateway.sendNewMessageToChatRoom(chatRoomId, payload);
+  }
 }

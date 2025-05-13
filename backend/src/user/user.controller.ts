@@ -28,6 +28,11 @@ export class UserController {
     return this.userService.getFriends(Number(user.id));
   }
 
+  @Get('allUsers')
+  getAllUsers() {
+    return this.userService.getAllUsers();
+  }
+
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.userService.findById(Number(id));
