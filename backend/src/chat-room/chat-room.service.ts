@@ -96,7 +96,6 @@ export class ChatRoomService {
         data: toAdd.map((user_id) => ({
           chat_room_id: id,
           user_id,
-          role: 'USER', // optional, maybe discuss more about the role in group. Temporrary use default role as User
         })),
         skipDuplicates: true,
       });

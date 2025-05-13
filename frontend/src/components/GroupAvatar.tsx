@@ -16,7 +16,7 @@ const GroupAvatar = ({ members }: GroupAvatarProps) => {
   const extraCount = members.length - displayedMembers.length;
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center py-1">
       <div className="flex">
         {displayedMembers.map((member, index) => (
           <div

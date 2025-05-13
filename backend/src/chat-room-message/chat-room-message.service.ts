@@ -70,26 +70,7 @@ export class ChatRoomMessageService {
         },
       });
 
-      // Get all members of the chat room
-      const roomMembers = await this.prisma.chatRoomMember.findMany({
-        where: {
-          chat_room_id: chatRoomId,
-        },
-        select: {
-          user_id: true,
-        },
-      });
-
-      // Send message to each member except the sender
-      for (const member of roomMembers) {
-        if (member.user_id !== senderId) {
-          this.chatService.emitToUser(
-            member.user_id,
-            'chat-room:new-message',
-            newMessage,
-          );
-        }
-      }
+      this.chatService.emitToChatRoom(String(chatRoomId), newMessage);
 
       return newMessage;
     } catch (error) {

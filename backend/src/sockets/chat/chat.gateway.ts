@@ -65,11 +65,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('receive_message', payload);
   }
 
+  @SubscribeMessage('join-room')
+  handleJoinRoom(client: Socket, roomId: string) {
+    void client.join(`chat-room-${roomId}`);
+    console.log(`joining-room: ${client.id} joined chat-room-${roomId}`);
+  }
+
   sendNewMessage(receiverId: string, message: Messages) {
     this.server.to(receiverId).emit('new-message', message);
   }
 
   getReceiverSocketId(receiverId: string) {
     return this.connectedUsers.get(receiverId);
+  }
+
+  sendNewMessageToChatRoom(chatRoomId: string, message: Messages) {
+    this.server
+      .to(`chat-room-${chatRoomId}`)
+      .emit('chat-room:new-message', message);
   }
 }

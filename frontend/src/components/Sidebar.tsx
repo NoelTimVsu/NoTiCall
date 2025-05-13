@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { useEffect, useState } from 'react';
-import { MoreHorizontal, Plus, Users, X } from 'lucide-react';
+import { MoreHorizontal, Plus, Users } from 'lucide-react';
 import { useChatStore, User } from '../store/useChatStore.js';
 import SidebarSkeleton from './skeletons/SidebarSkeleton.tsx';
 import { AvatarFallback, AvatarImage, Avatar } from '@radix-ui/react-avatar';
@@ -129,7 +129,7 @@ function Sidebar() {
         {groups.map(group => (
           <div
             key={group.id}
-            className={`relative group w-full p-4 flex flex-col gap-2 hover:bg-blue-50 transition-colors text-left ${
+            className={`relative group w-full py-4 px-2 lg:p-0 flex flex-col gap-2 hover:bg-blue-50 transition-colors text-left ${
               selectedUser?.id === group.id ? 'bg-base-300' : ''
             }`}
           >
@@ -141,46 +141,54 @@ function Sidebar() {
                   members: group.members,
                 })
               }
-              className="relative w-full text-left px-3 py-2 hover:bg-zinc-100 rounded-lg transition"
+              className="relative w-full text-left lg:px-3 lg:py-2 hover:bg-zinc-100 rounded-lg transition"
             >
               <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium text-gray-700 text-center">{group.name}</h3>
+                <h3 className="text-xs lg:text-sm font-medium text-gray-700">{group.name}</h3>
 
                 {/* Ellipsis Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="text-gray-500 hover:text-black p-1">
-                      <MoreHorizontal className="w-5 h-5" />
+                    <button
+                      className="text-gray-500 hover:text-black p-2 sm:p-1 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
+                      aria-label="Open group options"
+                    >
+                      <MoreHorizontal className=" w-4 h-4 sm:w-4 sm:h-4 lg:w-6 lg:h-6" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+
+                  <DropdownMenuContent align="end" className="w-40 sm:w-48">
                     <DropdownMenuItem
                       onSelect={() => setEditingGroup(group)}
-                      className="cursor-pointer"
+                      className="cursor-pointer text-sm sm:text-base"
                     >
                       Edit Group
                     </DropdownMenuItem>
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <DropdownMenuItem
                           onSelect={e => e.preventDefault()}
-                          className="text-red-600"
+                          className="text-red-600 cursor-pointer text-sm sm:text-base"
                         >
                           Delete Group
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+
+                      <AlertDialogContent className="max-w-sm sm:max-w-md">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Group?</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-lg sm:text-xl">
+                            Delete Group?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="text-sm sm:text-base">
                             Are you sure you want to delete <strong>{group.name}</strong>? This
                             action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4">
+                          <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            className="bg-red-600 hover:bg-red-700 text-white my-2"
+                            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
                             onClick={() => deleteGroup(group)}
                           >
                             Delete
@@ -196,7 +204,7 @@ function Sidebar() {
               <GroupAvatar members={group.members.map(m => m.user)} />
 
               {/* Status Pill */}
-              <div className="hidden lg:flex mt-2">
+              <div className="flex mt-2">
                 <span
                   className={`px-2 py-0.5 text-xs font-medium rounded-full ${checkAnyOnlineUser(group) ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
                 >

@@ -82,8 +82,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   setSelectedUser: selectedUser => {
-    console.log('selectedUser: ', selectedUser);
     set({ selectedUser });
+    const socket = useSocketStore.getState().socket;
+    if (socket?.connected && selectedUser && !isUser(selectedUser)) {
+      const roomId = selectedUser.id;
+      socket.emit('join-room', roomId);
+      console.log(`Emitted join-room for chat-room-${roomId}`);
+    }
   },
 
   sendMessage: async messageData => {

@@ -38,15 +38,15 @@ function ChatContainer() {
   const { authUser } = useAuthStore();
 
   useEffect(() => {
-    const selectUser = selectedUser;
-    console.log('selectUser: ', selectUser);
     getMessages(selectedUser);
     console.log('messages: ', messages);
     subscribeToMessages();
 
     // cleanup function
-    return () => unsubscribeFromMessages();
-  }, [getMessages, selectedUser?.id, subscribeToMessages, unsubscribeFromMessages]);
+    return () => {
+      unsubscribeFromMessages();
+    };
+  }, [getMessages, selectedUser, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
     if (messageContainerEndRef.current && messages.length > 0) {
