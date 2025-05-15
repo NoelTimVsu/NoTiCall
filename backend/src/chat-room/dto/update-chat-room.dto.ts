@@ -16,6 +16,10 @@ export class UpdateChatRoomDto {
   @IsString()
   name?: string;
 
+  @IsNumber()
+  @IsOptional()
+  update_by?: number;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateChatRoomMemberDto)

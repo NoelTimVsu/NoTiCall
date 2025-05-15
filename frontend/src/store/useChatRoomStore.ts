@@ -3,12 +3,17 @@ import toast from 'react-hot-toast';
 import { axiosInstance } from '@/lib/axios';
 import { User } from './useChatStore';
 import { useAuthStore } from './useAuthStore';
+import { useSocketStore } from './useSocketStore';
+import { Group } from 'lucide-react';
+
 export interface Group {
   id: number;
   name: string;
+  update_by: number;
+  created_by: number;
   members: {
     user: User;
-    joined_at: string;
+    chat_room_id: number;
     role: 'USER' | 'ADMIN';
   }[];
 }
@@ -23,12 +28,10 @@ interface GroupChatState {
     created_by: number;
     members: { user_id: number; role: string }[];
   }) => Promise<void>;
-  updateGroupChat: (payload: {
-    id: number;
-    name: string;
-    members: { chat_room_id: number; user_id: number; role: string }[];
-  }) => Promise<void>;
+  updateGroupChat: (group: Group) => Promise<void>;
   deleteGroupChat: (payload: { chat_room_id: number; user_id: number }) => Promise<void>;
+  subcribeToGroupChange: () => void;
+  unsubcribeToGroupChange: () => void;
 }
 
 export const useChatRoomStore = create<GroupChatState>(set => ({
@@ -68,9 +71,9 @@ export const useChatRoomStore = create<GroupChatState>(set => ({
     }
   },
 
-  updateGroupChat: async payload => {
+  updateGroupChat: async group => {
     try {
-      const response = await axiosInstance.patch('/chat-room/update-chat-room', payload);
+      const response = await axiosInstance.patch('/chat-room/update-chat-room', group);
 
       const updatedGroup = {
         ...response.data,
@@ -108,5 +111,52 @@ export const useChatRoomStore = create<GroupChatState>(set => ({
         useAuthStore.getState().logOut();
       }
     }
+  },
+
+  subcribeToGroupChange: () => {
+    const socket = useSocketStore.getState().socket;
+    if (!socket?.connected) return;
+
+    // Listen for 'group:created' event
+    socket.on('group:created', (newGroup: Group) => {
+      console.log('newGroup: ', newGroup);
+      set(state => {
+        const exists = state.groups.some(group => group.id === newGroup.id);
+        if (exists) {
+          return state;
+        }
+        return { groups: [...state.groups, newGroup] };
+      });
+      toast.success(`New group "${newGroup.name}" created!`);
+    });
+
+    // Listen for 'group:updated' event
+    socket.on('group:updated', (updatedGroup: Group) => {
+      set(state => {
+        const updatedGroups = state.groups.map(group =>
+          group.id === updatedGroup.id ? { ...group, ...updatedGroup } : group,
+        );
+        return { groups: updatedGroups };
+      });
+      toast.success(`Group "${updatedGroup.name}" updated!`);
+    });
+
+    //Listen for 'group:delete' event
+    socket.on('group:delete', (groupId: number) => {
+      console.log('Group delete:', groupId);
+      set(state => {
+        const updatedGroups = state.groups.filter(group => Number(group.id) !== Number(groupId));
+        toast.success(`Group "${groupId}" deleted!`);
+        return { groups: updatedGroups };
+      });
+    });
+  },
+
+  unsubcribeToGroupChange: () => {
+    const socket = useSocketStore.getState().socket;
+    if (!socket?.connected) return;
+    socket.off('group:created');
+    socket.off('group:updated');
+    socket.off('group:delete');
   },
 }));

@@ -7,8 +7,12 @@ export interface CreateGroupModalProps {
   group?: {
     id: number;
     name: string;
+    created_by: number;
+    update_by?: number;
     members: {
       user: User;
+      chat_room_id: number;
+      role: 'ADMIN' | 'USER';
     }[];
   };
 }

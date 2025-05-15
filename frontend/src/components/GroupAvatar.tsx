@@ -27,7 +27,7 @@ const GroupAvatar = ({ members }: GroupAvatarProps) => {
           >
             <Avatar className="w-full h-full">
               <AvatarImage
-                src={member.profile_pic || '/default-avatar.png'}
+                src={member.profile_pic ? member.profile_pic : '/default-avatar.png'}
                 className="object-cover rounded-full"
               />
               <AvatarFallback className="flex items-center justify-center w-full h-full text-xs font-medium text-gray-700 bg-gray-200 rounded-full">
