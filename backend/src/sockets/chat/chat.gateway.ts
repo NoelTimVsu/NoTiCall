@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Messages } from '@prisma/client';
+import { FriendShip, Messages, User } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -83,5 +83,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(`chat-room-${chatRoomId}`)
       .emit('chat-room:new-message', message);
+  }
+
+  notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
+    // remove hashed password
+    // const { password_hash, ...rest } = user;
+    this.server.to(receiverId).emit('notify-of-friend-request', friendRequest);
   }
 }

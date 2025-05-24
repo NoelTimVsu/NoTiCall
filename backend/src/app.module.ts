@@ -19,6 +19,7 @@ import { ChatRoomController } from 'src/chat-room/chat-room.controller';
 import { ChatRoomMessageModule } from './chat-room-message/chat-room-message.module';
 import { ChatRoomMessageService } from './chat-room-message/chat-room-message.service';
 import { ChatRoomMessageController } from './chat-room-message/chat-room-message.controller';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChatRoomMessageController } from './chat-room-message/chat-room-message
     ChatModule,
     ChatRoomModule,
     ChatRoomMessageModule,
+    NotificationModule,
   ],
   controllers: [
     AppController,

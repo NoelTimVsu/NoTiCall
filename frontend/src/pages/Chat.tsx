@@ -39,7 +39,6 @@ function ChatContainer() {
 
   useEffect(() => {
     getMessages(selectedUser);
-    console.log('messages: ', messages);
     subscribeToMessages();
 
     // cleanup function

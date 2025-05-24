@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
-import { Messages } from '@prisma/client';
+import { Messages, User, FriendShip } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
@@ -16,5 +16,9 @@ export class ChatService {
 
   emitToChatRoom(chatRoomId: string, payload: any) {
     this.chatGateway.sendNewMessageToChatRoom(chatRoomId, payload);
+  }
+
+  notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
+    this.chatGateway.notifyOfFriendRequest(receiverId, friendRequest);
   }
 }
