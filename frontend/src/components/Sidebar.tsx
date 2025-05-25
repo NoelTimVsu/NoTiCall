@@ -30,32 +30,32 @@ import FriendRequestModal from '@/components/FriendRequestModal.tsx';
 import CustomAvatar from '@/components/CustomAvatar.tsx';
 
 function Sidebar() {
-  const { getFriends, setSelectedUser, selectedUser, friends, isUsersLoading } = useChatStore();
-  const { onlineUsers } = useSocketStore();
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showFriendRequestModal, setShowFriendRequestModal] = useState(false);
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [showActions, setShowActions] = useState(false);
+  
+  const { getFriends, setSelectedUser, selectedUser, friends, isUsersLoading } = useChatStore();
+  const { onlineUsers } = useSocketStore();
   const {
     groups,
     getGroups,
     isLoading: isGroupsLoading,
     deleteGroupChat,
-    subcribeToGroupChange,
-    unsubcribeToGroupChange,
+    subscribeToGroupChange,
+    unsubscribeToGroupChange,
   } = useChatRoomStore();
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
-  const [showActions, setShowActions] = useState(false);
-  const { groups, getGroups, isLoading: isGroupsLoading, deleteGroupChat } = useChatRoomStore();
   const authUser = useAuthStore.getState().authUser;
 
   useEffect(() => {
     getFriends();
     getGroups();
-    subcribeToGroupChange();
+    subscribeToGroupChange();
     return () => {
-      unsubcribeToGroupChange();
+      unsubscribeToGroupChange();
     };
-  }, [getFriends, getGroups, subcribeToGroupChange, unsubcribeToGroupChange]);
+  }, [getFriends, getGroups, subscribeToGroupChange, unsubscribeToGroupChange]);
 
   const deleteGroup = (group: Group) => {
     if (!authUser) {

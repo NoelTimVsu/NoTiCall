@@ -30,8 +30,8 @@ interface GroupChatState {
   }) => Promise<void>;
   updateGroupChat: (group: Group) => Promise<void>;
   deleteGroupChat: (payload: { chat_room_id: number; user_id: number }) => Promise<void>;
-  subcribeToGroupChange: () => void;
-  unsubcribeToGroupChange: () => void;
+  subscribeToGroupChange: () => void;
+  unsubscribeToGroupChange: () => void;
 }
 
 export const useChatRoomStore = create<GroupChatState>(set => ({
@@ -113,7 +113,7 @@ export const useChatRoomStore = create<GroupChatState>(set => ({
     }
   },
 
-  subcribeToGroupChange: () => {
+  subscribeToGroupChange: () => {
     const socket = useSocketStore.getState().socket;
     if (!socket?.connected) return;
 
@@ -152,7 +152,7 @@ export const useChatRoomStore = create<GroupChatState>(set => ({
     });
   },
 
-  unsubcribeToGroupChange: () => {
+  unsubscribeToGroupChange: () => {
     const socket = useSocketStore.getState().socket;
     if (!socket?.connected) return;
     socket.off('group:created');
