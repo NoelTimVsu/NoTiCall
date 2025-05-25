@@ -35,7 +35,7 @@ function Sidebar() {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [showActions, setShowActions] = useState(false);
-  
+
   const { getFriends, setSelectedUser, selectedUser, friends, isUsersLoading } = useChatStore();
   const { onlineUsers } = useSocketStore();
   const {

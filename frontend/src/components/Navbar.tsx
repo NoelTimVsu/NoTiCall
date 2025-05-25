@@ -37,7 +37,9 @@ const Navbar = () => {
                 onClick={() => setShowNotifications((prev) => !prev)}
               />
               {friendRequestNotifications.length > 0 && (
-                <span className="absolute w-2 h-2 right-0 bottom-0 bg-red-600 rounded" />
+                <span className="absolute flex justify-center items-center w-4 h-4 right-[-5px] bottom-[-5px] text-white text-sm bg-red-600 rounded">
+                  {friendRequestNotifications.length}
+                </span>
               )}
               {showNotifications && (
                 <div className="absolute right-0 top-10">
