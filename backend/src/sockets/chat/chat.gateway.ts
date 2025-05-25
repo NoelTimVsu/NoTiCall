@@ -8,6 +8,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { FriendShip, Messages } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
+import { GroupDto } from 'src/chat-room/dto/group.dto';
+import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
 
 @Injectable()
 @WebSocketGateway({
@@ -86,8 +88,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
-    // remove hashed password
-    // const { password_hash, ...rest } = user;
     this.server.to(receiverId).emit('notify-of-friend-request', friendRequest);
+  }
+
+  emitNewGroup(group: CreateChatRoomWithMembersDto) {
+    group.members.forEach((member) => {
+      const userId = member.user_id;
+      if (Number(userId) !== Number(group.created_by)) {
+        const socketId = this.getReceiverSocketId(userId.toString());
+        if (socketId) {
+          this.server.to(socketId).emit('group:created', group);
+        }
+      }
+    });
+  }
+
+  updateGroup(group: GroupDto) {
+    group.members.forEach((member) => {
+      const userId = member.user.id;
+      if (Number(userId) !== Number(group.update_by)) {
+        const socketId = this.getReceiverSocketId(userId.toString());
+        if (socketId) {
+          this.server.to(socketId).emit('group:updated', group);
+        }
+      }
+    });
+  }
+
+  deleteGroup(groupId: number, userRemoveIds: number[]) {
+    if (userRemoveIds.length === 1) {
+      const socketId = this.getReceiverSocketId(userRemoveIds[0].toString());
+      if (socketId) {
+        this.server.to(socketId).emit('group:delete', groupId.toString());
+      }
+    } else {
+      userRemoveIds.forEach((userId) => {
+        const socketId = this.getReceiverSocketId(userId.toString());
+        if (socketId) {
+          this.server.to(socketId).emit('group:delete', groupId.toString());
+        }
+      });
+    }
   }
 }

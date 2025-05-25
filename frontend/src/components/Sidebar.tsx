@@ -35,6 +35,14 @@ function Sidebar() {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showFriendRequestModal, setShowFriendRequestModal] = useState(false);
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const {
+    groups,
+    getGroups,
+    isLoading: isGroupsLoading,
+    deleteGroupChat,
+    subcribeToGroupChange,
+    unsubcribeToGroupChange,
+  } = useChatRoomStore();
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [showActions, setShowActions] = useState(false);
   const { groups, getGroups, isLoading: isGroupsLoading, deleteGroupChat } = useChatRoomStore();
@@ -43,7 +51,11 @@ function Sidebar() {
   useEffect(() => {
     getFriends();
     getGroups();
-  }, [getFriends, getGroups]);
+    subcribeToGroupChange();
+    return () => {
+      unsubcribeToGroupChange();
+    };
+  }, [getFriends, getGroups, subcribeToGroupChange, unsubcribeToGroupChange]);
 
   const deleteGroup = (group: Group) => {
     if (!authUser) {
@@ -171,6 +183,8 @@ function Sidebar() {
                 setSelectedUser({
                   id: group.id,
                   name: group.name,
+                  update_by: group.update_by,
+                  created_by: group.created_by,
                   members: group.members,
                 })
               }
@@ -221,7 +235,7 @@ function Sidebar() {
                         <AlertDialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4">
                           <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
+                            className="w-full mt-2 sm:w-auto bg-red-600 hover:bg-red-700 text-white"
                             onClick={() => deleteGroup(group)}
                           >
                             Delete

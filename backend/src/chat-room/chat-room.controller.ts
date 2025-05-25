@@ -7,11 +7,12 @@ import {
   Patch,
   Get,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ChatRoomService } from './chat-room.service';
-import { CreateChatRoomDto } from './dto/create-chat-room.dto';
-import { CreateChatRoomMemberDto } from 'src/chat-room/dto/create-chat-room-memeber.dto';
-import { UpdateChatRoomDto } from './dto/update-chat-room.dto';
+import { GroupDto } from './dto/group.dto';
+import { Request } from 'express';
+import type { CreateChatRoomWithMembersDto } from './dto/create-chat-room-members.dto';
 
 @Controller('chat-room')
 export class ChatRoomController {
@@ -21,11 +22,8 @@ export class ChatRoomController {
   @Post()
   async createRoomWithMembers(
     @Body()
-    createChatRoomDto: CreateChatRoomDto & {
-      members: CreateChatRoomMemberDto[];
-    },
+    createChatRoomDto: CreateChatRoomWithMembersDto,
   ) {
-    // Create chat room
     const chatRoom =
       await this.chatRoomService.createWithMembers(createChatRoomDto);
     return chatRoom;
@@ -33,9 +31,9 @@ export class ChatRoomController {
 
   // Update a chat room's details
   @Patch('update-chat-room')
-  async updateChatRoom(@Body() body: UpdateChatRoomDto) {
-    const { id, name, members } = body;
-    return this.chatRoomService.updateChatRoom(id, name ?? '', members);
+  updateChatRoom(@Req() req: Request) {
+    const groupPayLoad = req.body as GroupDto;
+    return this.chatRoomService.updateChatRoom(groupPayLoad);
   }
 
   // Get a specific chat room with members and messages

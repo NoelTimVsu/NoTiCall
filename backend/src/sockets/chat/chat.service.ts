@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 import { Messages, FriendShip } from '@prisma/client';
+import type { GroupDto } from 'src/chat-room/dto/group.dto';
+import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
 
 @Injectable()
 export class ChatService {
@@ -20,5 +22,17 @@ export class ChatService {
 
   notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
     this.chatGateway.notifyOfFriendRequest(receiverId, friendRequest);
+  }
+
+  addNewGroup(newGroup: CreateChatRoomWithMembersDto) {
+    this.chatGateway.emitNewGroup(newGroup);
+  }
+
+  updateGroup(group: GroupDto) {
+    this.chatGateway.updateGroup(group);
+  }
+
+  deleteGroup(groupId: number, userIds: number[]) {
+    this.chatGateway.deleteGroup(groupId, userIds);
   }
 }
