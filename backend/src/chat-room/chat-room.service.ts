@@ -1,14 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateChatRoomDto } from 'src/chat-room/dto/create-chat-room.dto';
-import { CreateChatRoomMemberDto } from 'src/chat-room/dto/create-chat-room-member.dto';
 import { DeleteChatRoomDto } from './dto/delete-chat-room.dto';
 import { ChatService } from '../sockets/chat/chat.service';
 import { GroupDto } from './dto/group.dto';
+import type { CreateChatRoomWithMembersDto } from './dto/create-chat-room-members.dto';
 
-type SubcribeGroupPayLoad = CreateChatRoomDto & {
-  members: CreateChatRoomMemberDto[];
-};
 @Injectable()
 export class ChatRoomService {
   constructor(
@@ -38,11 +34,7 @@ export class ChatRoomService {
     });
   }
 
-  async createWithMembers(
-    createChatRoomDto: CreateChatRoomDto & {
-      members: CreateChatRoomMemberDto[];
-    },
-  ) {
+  async createWithMembers(createChatRoomDto: CreateChatRoomWithMembersDto) {
     const chatRoom = await this.prisma.chatRoom.create({
       data: {
         name: createChatRoomDto.name,
@@ -50,7 +42,6 @@ export class ChatRoomService {
         members: {
           create: createChatRoomDto.members.map((member) => ({
             user_id: member.user_id,
-
             role: member.role,
           })),
         },
@@ -66,7 +57,7 @@ export class ChatRoomService {
     if (chatRoom.name === null) {
       throw new Error('Chat room name cannot be null');
     }
-    this.chatService.addNewGroup(chatRoom as SubcribeGroupPayLoad);
+    this.chatService.addNewGroup(chatRoom as CreateChatRoomWithMembersDto);
 
     return chatRoom;
   }
@@ -124,7 +115,7 @@ export class ChatRoomService {
         ...createChatRoomDto,
         members: createChatRoomMemberDto,
       };
-      this.chatService.addNewGroup(chatRoom as SubcribeGroupPayLoad);
+      this.chatService.addNewGroup(chatRoom as CreateChatRoomWithMembersDto);
       await this.prisma.chatRoomMember.createMany({
         data: toAdd.map((user_id) => ({
           chat_room_id: chatRoomId,

@@ -10,10 +10,9 @@ import {
   Req,
 } from '@nestjs/common';
 import { ChatRoomService } from './chat-room.service';
-import { CreateChatRoomDto } from './dto/create-chat-room.dto';
-import { CreateChatRoomMemberDto } from 'src/chat-room/dto/create-chat-room-member.dto';
 import { GroupDto } from './dto/group.dto';
 import { Request } from 'express';
+import type { CreateChatRoomWithMembersDto } from './dto/create-chat-room-members.dto';
 
 @Controller('chat-room')
 export class ChatRoomController {
@@ -23,11 +22,8 @@ export class ChatRoomController {
   @Post()
   async createRoomWithMembers(
     @Body()
-    createChatRoomDto: CreateChatRoomDto & {
-      members: CreateChatRoomMemberDto[];
-    },
+    createChatRoomDto: CreateChatRoomWithMembersDto,
   ) {
-    // Create chat room
     const chatRoom =
       await this.chatRoomService.createWithMembers(createChatRoomDto);
     return chatRoom;

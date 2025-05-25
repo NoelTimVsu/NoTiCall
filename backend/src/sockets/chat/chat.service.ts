@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 import { Messages } from '@prisma/client';
-import type { CreateChatRoomDto } from 'src/chat-room/dto/create-chat-room.dto';
-import type { CreateChatRoomMemberDto } from 'src/chat-room/dto/create-chat-room-member.dto';
 import type { GroupDto } from 'src/chat-room/dto/group.dto';
+import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
 
-type SubcribeGroupPayLoad = CreateChatRoomDto & {
-  members: CreateChatRoomMemberDto[];
-};
 @Injectable()
 export class ChatService {
   constructor(private readonly chatGateway: ChatGateway) {}
@@ -24,7 +20,7 @@ export class ChatService {
     this.chatGateway.sendNewMessageToChatRoom(chatRoomId, payload);
   }
 
-  addNewGroup(newGroup: SubcribeGroupPayLoad) {
+  addNewGroup(newGroup: CreateChatRoomWithMembersDto) {
     this.chatGateway.emitNewGroup(newGroup);
   }
 

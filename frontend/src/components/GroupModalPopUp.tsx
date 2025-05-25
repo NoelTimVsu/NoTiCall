@@ -99,7 +99,6 @@ function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: Create
       created_by: currentUser.id,
       members: selectedFromFiltered.map(user => ({
         user_id: user.id,
-        role: 'USER',
       })),
     };
 

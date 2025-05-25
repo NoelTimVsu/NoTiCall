@@ -26,7 +26,7 @@ interface GroupChatState {
   createGroupChat: (payload: {
     name: string;
     created_by: number;
-    members: { user_id: number; role: string }[];
+    members: { user_id: number }[];
   }) => Promise<void>;
   updateGroupChat: (group: Group) => Promise<void>;
   deleteGroupChat: (payload: { chat_room_id: number; user_id: number }) => Promise<void>;

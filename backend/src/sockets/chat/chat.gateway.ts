@@ -7,15 +7,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Messages } from '@prisma/client';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { CreateChatRoomDto } from 'src/chat-room/dto/create-chat-room.dto';
-import { CreateChatRoomMemberDto } from 'src/chat-room/dto/create-chat-room-member.dto';
+import { Injectable } from '@nestjs/common';
 import { GroupDto } from 'src/chat-room/dto/group.dto';
-import { ChatRoomService } from 'src/chat-room/chat-room.service';
+import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
 
-type SubcribeGroupPayLoad = CreateChatRoomDto & {
-  members: CreateChatRoomMemberDto[];
-};
 @Injectable()
 @WebSocketGateway({
   cors: {
@@ -28,10 +23,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   connectedUsers: Map<string, string>;
   private userSockets: Map<number, Socket>;
 
-  constructor(
-    @Inject(forwardRef(() => ChatRoomService))
-    private readonly chatRoomService: ChatRoomService,
-  ) {
+  constructor() {
     this.connectedUsers = new Map<string, string>();
     this.userSockets = new Map<number, Socket>();
   }
@@ -95,7 +87,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit('chat-room:new-message', message);
   }
 
-  emitNewGroup(group: SubcribeGroupPayLoad) {
+  emitNewGroup(group: CreateChatRoomWithMembersDto) {
     group.members.forEach((member) => {
       const userId = member.user_id;
       if (Number(userId) !== Number(group.created_by)) {
