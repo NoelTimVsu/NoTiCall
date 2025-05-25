@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { CreateGroupModalProps } from '@/types/GroupModalPopUp.types';
 import { Loader2, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
-import { useChatRoomStore } from '@/store/useChatRoomStore';
+import { useChatRoomStore, Group } from '@/store/useChatRoomStore';
 import toast from 'react-hot-toast';
 
 function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: CreateGroupModalProps) {
@@ -64,12 +64,14 @@ function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: Create
     }
 
     if (typeOfModal === 'edit' && group) {
-      const updatePayload = {
+      const updatePayload: Group = {
         name: groupName || `Group with ${selectedFromFiltered.length} members`,
         id: group.id,
+        update_by: currentUser.id,
+        created_by: group.created_by,
         members: selectedFromFiltered.map(user => ({
+          user,
           chat_room_id: group.id,
-          user_id: user.id,
           role: 'USER',
         })),
       };
@@ -97,7 +99,6 @@ function CreateGroupModal({ onClose, onGroupCreate, typeOfModal, group }: Create
       created_by: currentUser.id,
       members: selectedFromFiltered.map(user => ({
         user_id: user.id,
-        role: 'USER',
       })),
     };
 
