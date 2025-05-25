@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { FriendShip, Messages, User } from '@prisma/client';
+import { FriendShip, Messages } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

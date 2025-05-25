@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
-import { Messages, User, FriendShip } from '@prisma/client';
+import { Messages, FriendShip } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
