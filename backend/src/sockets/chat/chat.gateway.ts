@@ -86,8 +86,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
-    // remove hashed password
-    // const { password_hash, ...rest } = user;
     this.server.to(receiverId).emit('notify-of-friend-request', friendRequest);
+  }
+
+  notifyOfFriendRequestResponse(receiverId: string) {
+    this.server.to(receiverId).emit('notify-of-friend-request-response');
   }
 }

@@ -165,10 +165,10 @@ export class UserService {
           OR: [
             {
               user_id: +friendId,
-              friend_id: currentUserId, // the friend is who sent the request, so in the table the friendId is the userId
+              friend_id: currentUserId, // the friend is who sent the request, so in the table the friend_id is the user_id
             },
             {
-              user_id: currentUserId, // the friend is who sent the request, so in the table the friendId is the userId
+              user_id: currentUserId, // the friend is who sent the request, so in the table the friend_id is the user_id
               friend_id: +friendId,
             },
           ],
@@ -196,5 +196,10 @@ export class UserService {
       }),
     ]);
     // TODO: Notify of decision
+    const friendSocketId = this.chatService.getReceiverSocketId(friendId);
+
+    if (friendSocketId) {
+      this.chatService.notifyOfFriendRequestResponse(friendSocketId);
+    }
   }
 }

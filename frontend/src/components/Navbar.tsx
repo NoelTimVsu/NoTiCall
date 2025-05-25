@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/useAuthStore.ts';
 import { useNotificationStore, Notification } from '@/store/useNotificationStore.ts';
 import { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/useUserStore.ts';
+import CustomAvatar from '@/components/CustomAvatar.tsx';
 
 const Navbar = () => {
   const { friendRequestNotifications, getNotifications } = useNotificationStore();
@@ -67,7 +68,14 @@ function FriendRequestNotification({ notification }: { notification: Notificatio
   const { responseFriendRequest } = useUserStore();
 
   return <div className="bg-white shadow-md p-4 flex flex-col border-b-1">
-    <p className="text-lg">{notification.message}</p>
+    <div className="flex items-center gap-4 mx-auto md:mx-0">
+      <CustomAvatar
+        profile_pic={notification.actor.profile_pic}
+        fallback={notification.actor.username.slice(0, 2).toUpperCase()}
+      />
+      <p className="text-lg">{notification.message}</p>
+    </div>
+
     <div className="mt-4 flex gap-2">
       <button className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
               onClick={() => responseFriendRequest(notification.actor.id, 'accept')}

@@ -21,4 +21,8 @@ export class ChatService {
   notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
     this.chatGateway.notifyOfFriendRequest(receiverId, friendRequest);
   }
+
+  notifyOfFriendRequestResponse(receiverId: string) {
+    this.chatGateway.notifyOfFriendRequestResponse(receiverId);
+  }
 }
