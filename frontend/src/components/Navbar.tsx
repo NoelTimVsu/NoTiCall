@@ -14,7 +14,7 @@ const Navbar = () => {
 
   useEffect(() => {
     getNotifications();
-  }, [getNotifications]);
+  }, [getNotifications, isLoggedIn]);
 
   return (
     <nav className="top-0 sticky z-20 w-full flex items-center justify-between p-4 shadow-lg bg-gray/90 px-20">
