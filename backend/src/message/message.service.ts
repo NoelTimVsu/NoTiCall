@@ -1,13 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MessageDto } from 'src/message/dto';
 import { ChatService } from 'src/sockets/chat/chat.service';
+import { MediaUploadService } from 'src/media-upload/media-upload.service';
 
 @Injectable()
 export class MessageService {
+  private readonly logger = new Logger(MessageService.name);
+
   constructor(
     private prisma: PrismaService,
     private chatService: ChatService,
+    private mediaUploadService: MediaUploadService,
   ) {}
 
   async getMessagesWithFriend(senderId: number, receiverId: number) {
@@ -30,7 +34,7 @@ export class MessageService {
         },
       });
     } catch (error) {
-      console.log('Error getting messages', error);
+      this.logger.error('Error getting messages', error);
       throw new HttpException(
         {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -51,12 +55,21 @@ export class MessageService {
     message: MessageDto,
   ) {
     try {
+      let imageUrl: string | undefined = undefined;
+      if (message.image) {
+        const folderPath = `chat-images/userId-${senderId}`;
+        imageUrl = await this.mediaUploadService.uploadImage(
+          message.image,
+          folderPath,
+        );
+      }
+
       const newMessage = await this.prisma.messages.create({
         data: {
           sender_id: senderId,
           receiver_id: receiverId,
           content: message.content,
-          image: message.image,
+          image: imageUrl,
         },
       });
 
@@ -72,7 +85,7 @@ export class MessageService {
       // return the message via http response
       return newMessage;
     } catch (error) {
-      console.log('Error getting messages', error);
+      this.logger.error('Error getting messages', error);
       throw new HttpException(
         {
           status: HttpStatus.INTERNAL_SERVER_ERROR,

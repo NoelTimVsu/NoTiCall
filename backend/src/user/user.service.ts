@@ -4,12 +4,14 @@ import { UserDto } from './dto/user.dto';
 import { UserUpdateDto } from 'src/user/dto/user.update.dto';
 import { ChatService } from 'src/sockets/chat/chat.service';
 import { NotificationTypes, Status } from '@prisma/client';
+import { MediaUploadService } from 'src/media-upload/media-upload.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private chatService: ChatService,
+    private mediaUploadService: MediaUploadService,
   ) {}
 
   async findById(id: number) {
@@ -31,7 +33,26 @@ export class UserService {
   }
 
   async update(id: number, data: UserUpdateDto) {
-    return this.prisma.user.update({ where: { id }, data: data });
+    let profileImage: string | undefined = undefined;
+    if (data.profile_pic) {
+      const folderPath = `profile-images/userId-${id}`;
+      profileImage = await this.mediaUploadService.uploadImage(
+        data.profile_pic,
+        folderPath,
+      );
+    }
+
+    if (profileImage) {
+      return this.prisma.user.update({
+        where: { id },
+        data: {
+          ...data,
+          profile_pic: profileImage,
+        },
+      });
+    } else {
+      return this.prisma.user.update({ where: { id }, data: data });
+    }
   }
 
   async delete(id: number) {

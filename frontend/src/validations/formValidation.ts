@@ -16,6 +16,7 @@ export const updateProfileFormValidation = z.object({
   full_name: z.string().min(1, "Full name is required"),
   username: z.string().min(1, "Username is required"),
   email: z.string().email("Invalid email format").min(1, "Email is required"),
+  profile_pic: z.string().optional(),
 });
 
 export type SingUpData = z.infer<typeof signUpFormValidation>;

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Camera } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -17,11 +18,16 @@ import {
 } from "@/components/ui/card";
 import { useUpdateProfileFormValidation } from "@/hooks/useFormValidation";
 import { useAuthStore } from '@/store/useAuthStore.ts';
-import { useEffect } from 'react';
+import { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useUserStore } from '@/store/useUserStore.ts';
 import { UpdateProfileData } from '@/validations/formValidation.ts';
+import CustomAvatar from '@/components/CustomAvatar.tsx';
+import toast from 'react-hot-toast';
+import { Controller } from 'react-hook-form';
 
 const Profile = () => {
+  const [selectedImage, setSelectedImage] = useState<string>("");
+
   const form = useUpdateProfileFormValidation();
   const {
     control,
@@ -30,12 +36,35 @@ const Profile = () => {
     reset,
   } = form;
   const { authUser } = useAuthStore();
-  const { updateProfile } = useUserStore();
+  const { updateProfile, isUpdatingProfile } = useUserStore();
+
+  const handleImageChange = useCallback((
+    e: ChangeEvent<HTMLInputElement>,
+    onChange: (...event: any[]) => void,
+  ) => {
+    const file = e.target.files?.[0];
+    if(!file || !file.type.startsWith('image/')) {
+      toast.error('Please select an image');
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      if (typeof base64Image === 'string') {
+        setSelectedImage(base64Image as string);
+        onChange(base64Image);
+      }
+    }
+
+    reader.readAsDataURL(file);
+  }, []);
 
   const onSubmit = (values: UpdateProfileData) => {
     updateProfile({
       ...values,
-      id: authUser?.id || ''
+      id: authUser?.id,
     });
     reset();
   };
@@ -56,13 +85,45 @@ const Profile = () => {
           <CardDescription>Update your profile information</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-full border-2 bg-white flex items-center justify-center text-lg font-bold">
-              { authUser ? authUser.username.toUpperCase().slice(0, 2) : "ME" }
-            </div>
-          </div>
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <Controller
+                control={control}
+                name="profile_pic"
+                render={({ field }) => (
+                  <div className="flex justify-center mb-6">
+                    <div className="relative">
+                      <FormItem>
+                        <FormLabel className={`absolute size-8 bottom-[-7px] right-[-7px] 
+                                    bg-gray-50 border-2 flex items-center justify-center 
+                                    hover:scale-105 p2 rounded-full cursor-pointer 
+                                    transition-all duration-200 
+                                    ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}`} >
+                          <Camera className="size-5 text-black" />
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            name={field.name}
+                            ref={field.ref}
+                            type="file"
+                            className="hidden"
+                            accept="image/jpeg,image/jpg,image/png"
+                            onChange={(e) => handleImageChange(e, field.onChange)}
+                            disabled={isUpdatingProfile}
+                          />
+                        </FormControl>
+
+                        <CustomAvatar
+                          size={76}
+                          profile_pic={selectedImage || authUser?.profile_pic}
+                          fallback={authUser?.username.toUpperCase().slice(0, 2) || 'ME'}
+                        />
+                      </FormItem>
+                    </div>
+                  </div>
+                )}
+              />
+
               <FormField
                 control={control}
                 name="full_name"
