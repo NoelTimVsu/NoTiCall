@@ -1,6 +1,9 @@
 import { io, Socket } from "socket.io-client";
 import { create } from 'zustand';
 import { useAuthStore } from '@/store/useAuthStore.ts';
+import { useChatStore, User } from '@/store/useChatStore.ts';
+import { useNotificationStore } from '@/store/useNotificationStore.ts';
+import { useUserStore } from '@/store/useUserStore.ts';
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
 
@@ -31,8 +34,21 @@ export const useSocketStore = create<SocketState>((set, get) => {
 
       set({socket: clientSocket});
 
+      // listen for users getting online
       clientSocket.on("get-online-users", (userIds: string[]) => {
         set({onlineUsers: userIds});
+      });
+
+      // listen for notifications of friend requests
+      clientSocket.on("notify-of-friend-request", () => {
+        // fetch new notifications
+        useNotificationStore.getState().getNotifications();
+      });
+
+      // listen for friend request responses
+      clientSocket.on("notify-of-friend-request-response", () => {
+        // fetch new friends
+        useChatStore.getState().getFriends();
       });
     },
     disconnectFromSocket: () => {

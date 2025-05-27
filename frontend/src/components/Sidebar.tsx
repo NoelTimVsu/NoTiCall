@@ -20,38 +20,42 @@ import { useEffect, useState } from 'react';
 import { MoreHorizontal, Plus, Users } from 'lucide-react';
 import { useChatStore, User } from '../store/useChatStore.js';
 import SidebarSkeleton from './skeletons/SidebarSkeleton.tsx';
-import { AvatarFallback, AvatarImage, Avatar } from '@radix-ui/react-avatar';
 import { useSocketStore } from '@/store/useSocketStore.ts';
 import CreateGroupModal from './GroupModalPopUp.tsx';
 import GroupAvatar from './GroupAvatar.tsx';
 import { useChatRoomStore, Group } from '@/store/useChatRoomStore.ts';
 import { useAuthStore } from '@/store/useAuthStore.ts';
 import toast from 'react-hot-toast';
+import FriendRequestModal from '@/components/FriendRequestModal.tsx';
+import CustomAvatar from '@/components/CustomAvatar.tsx';
 
 function Sidebar() {
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showFriendRequestModal, setShowFriendRequestModal] = useState(false);
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [showActions, setShowActions] = useState(false);
+
   const { getFriends, setSelectedUser, selectedUser, friends, isUsersLoading } = useChatStore();
   const { onlineUsers } = useSocketStore();
-  const [showGroupModal, setShowGroupModal] = useState(false);
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const {
     groups,
     getGroups,
     isLoading: isGroupsLoading,
     deleteGroupChat,
-    subcribeToGroupChange,
-    unsubcribeToGroupChange,
+    subscribeToGroupChange,
+    unsubscribeToGroupChange,
   } = useChatRoomStore();
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const authUser = useAuthStore.getState().authUser;
 
   useEffect(() => {
     getFriends();
     getGroups();
-    subcribeToGroupChange();
+    subscribeToGroupChange();
     return () => {
-      unsubcribeToGroupChange();
+      unsubscribeToGroupChange();
     };
-  }, [getFriends, getGroups, subcribeToGroupChange, unsubcribeToGroupChange]);
+  }, [getFriends, getGroups, subscribeToGroupChange, unsubscribeToGroupChange]);
 
   const deleteGroup = (group: Group) => {
     if (!authUser) {
@@ -83,17 +87,45 @@ function Sidebar() {
         <div className="flex items-center gap-2">
           <Users className="size-6" />
           <span className="font-medium hidden lg:block">Contacts</span>
-          {/* The button to create a group */}
-          <button
-            onClick={() => setShowGroupModal(true)}
-            title="Create Group"
-            className="p-2 rounded-full hover:bg-gray-200 transition"
-          >
-            <Plus className="w-5 h-5 text-blue-500" />
-          </button>
+          {/* The button to create a group or add a friend */}
+          {/* show two options */}
+          {/* 1. add a friend */}
+          {/* 2. create group chat */}
+          <div className="relative">
+            <button
+              onClick={() => setShowActions((prev) => !prev)}
+              title="More Options"
+              className="p-2 rounded-full hover:bg-gray-200 transition"
+            >
+              <Plus className="w-5 h-5 text-blue-500" />
+            </button>
+
+            {showActions && (
+              <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                <button
+                  onClick={() => {
+                    setShowFriendRequestModal(true);
+                    setShowActions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  Add a Friend
+                </button>
+                <button
+                  onClick={() => {
+                    setShowGroupModal(true);
+                    setShowActions(false);
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  Create Group Chat
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mt-3 hidden lg:flex items-center gap-2">
+        <div className="mt-3 hidden md:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
               type="checkbox"
@@ -113,17 +145,17 @@ function Sidebar() {
             onClick={() => setSelectedUser(friend)}
             className={`w-full p-3 flex items-center gap-3 hover:bg-blue-50 transition-colors ${selectedUser?.id === friend.id ? 'bg-base-300' : ''}`}
           >
-            <div className="relative mx-auto lg:mx-0">
-              <Avatar className="w-8 h-8 rounded-full border-2 p-2">
-                <AvatarImage src={friend.profile_pic || '/default-avatar.png'} />
-                <AvatarFallback>{friend.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
+            <div className="relative mx-auto md:mx-0">
+              <CustomAvatar
+                profile_pic={friend.profile_pic}
+                fallback={friend.username.slice(0, 2).toUpperCase()}
+              />
               {onlineUsers.includes(String(friend.id)) && (
                 <span className="absolute bottom-[-8px] right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
               )}
             </div>
 
-            <div className="hidden lg:block text-left min-w-0">
+            <div className="hidden md:block text-left min-w-0">
               <div className="font-medium truncate">{friend.full_name}</div>
               <div className="text-sm text-zinc-400">
                 {onlineUsers.includes(String(friend.id)) ? 'Online' : 'Offline'}
@@ -136,7 +168,7 @@ function Sidebar() {
           <div className="text-center text-zinc-500 py-4">No online users</div>
         )}
 
-        {/* dislay group */}
+        {/* display group */}
         {groups.map(group => (
           <div
             key={group.id}
@@ -144,7 +176,7 @@ function Sidebar() {
               selectedUser?.id === group.id ? 'bg-base-300' : ''
             }`}
           >
-            <button
+            <div
               onClick={() =>
                 setSelectedUser({
                   id: group.id,
@@ -224,7 +256,7 @@ function Sidebar() {
                   {checkAnyOnlineUser(group) ? 'Online' : 'Offline'}
                 </span>
               </div>
-            </button>
+            </div>
           </div>
         ))}
 
@@ -249,6 +281,12 @@ function Sidebar() {
             typeOfModal="edit"
           />
         )}
+
+        {/* Modal for sending new friend requests */}
+        {showFriendRequestModal && (
+          <FriendRequestModal onClose={() => setShowFriendRequestModal(false)} />
+        )}
+
       </div>
     </aside>
   );

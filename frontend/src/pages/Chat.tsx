@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/useAuthStore.ts';
 import { formatMessageTime } from '@/lib/utils.ts';
 import Sidebar from '@/components/Sidebar.tsx';
 import { useSocketStore } from '@/store/useSocketStore.ts';
+import CustomAvatar from '@/components/CustomAvatar.tsx';
 
 function NoChatSelected() {
   return (
@@ -39,7 +40,6 @@ function ChatContainer() {
 
   useEffect(() => {
     getMessages(selectedUser);
-    console.log('messages: ', messages);
     subscribeToMessages();
 
     // cleanup function
@@ -76,33 +76,27 @@ function ChatContainer() {
             ref={messageContainerEndRef}
           >
             <div className="chat-image avatar">
-              <Avatar className="w-8 h-8 rounded-full border-2 p-2">
-                <AvatarImage
-                  src={
-                    message.sender_id === authUser?.id
-                      ? authUser?.profile_pic
-                      : selectedUser && 'username' in selectedUser
-                        ? selectedUser.profile_pic
-                        : selectedUser && 'members' in selectedUser
-                          ? selectedUser.members.find(
-                              member => member.user.id === message.sender_id,
-                            )?.user.profile_pic
-                          : undefined
-                  }
-                />
-                <AvatarFallback>
-                  {message.sender_id === authUser?.id
-                    ? authUser?.username.slice(0, 2).toUpperCase()
-                    : selectedUser && 'username' in selectedUser
-                      ? selectedUser?.username.slice(0, 2).toUpperCase()
-                      : selectedUser && 'members' in selectedUser
-                        ? selectedUser.members
-                            .find(member => member.user.id === message.sender_id)
-                            ?.user.username.slice(0, 2)
-                            .toUpperCase()
-                        : undefined}
-                </AvatarFallback>
-              </Avatar>
+              <CustomAvatar
+                profile_pic={message.sender_id === authUser?.id
+                ? authUser?.profile_pic
+                : selectedUser && 'username' in selectedUser
+                  ? selectedUser.profile_pic
+                  : selectedUser && 'members' in selectedUser
+                    ? selectedUser.members.find(
+                      member => member.user.id === message.sender_id,
+                    )?.user.profile_pic
+                    : undefined}
+
+                fallback={message.sender_id === authUser?.id
+                ? authUser?.username.slice(0, 2).toUpperCase()
+                : selectedUser && 'username' in selectedUser
+                  ? selectedUser?.username.slice(0, 2).toUpperCase()
+                  : selectedUser && 'members' in selectedUser
+                    ? selectedUser.members
+                      .find(member => member.user.id === message.sender_id)
+                      ?.user.username.slice(0, 2)
+                      .toUpperCase()
+                    : undefined} />
             </div>
 
             <div className="chat-header mb-1">
@@ -169,16 +163,12 @@ function ChatHeader() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <Avatar className="w-8 h-8 rounded-full border-2 p-2">
-            <AvatarImage
-              src={selectedUser && 'username' in selectedUser ? selectedUser.profile_pic : ''}
-            />
-            <AvatarFallback>
-              {selectedUser && 'username' in selectedUser
-                ? selectedUser?.username.slice(0, 2).toUpperCase()
-                : selectedUser?.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <CustomAvatar
+            profile_pic={selectedUser && 'username' in selectedUser ? selectedUser.profile_pic : ''}
+            fallback={selectedUser && 'username' in selectedUser
+              ? selectedUser?.username.slice(0, 2).toUpperCase()
+              : selectedUser?.name.slice(0, 2).toUpperCase()}
+          />
 
           {/* User info */}
           <div>

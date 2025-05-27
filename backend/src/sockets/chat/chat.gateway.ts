@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Messages } from '@prisma/client';
+import { FriendShip, Messages } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { GroupDto } from 'src/chat-room/dto/group.dto';
 import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
@@ -87,6 +87,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit('chat-room:new-message', message);
   }
 
+  notifyOfFriendRequest(receiverId: string, friendRequest: FriendShip) {
+    this.server.to(receiverId).emit('notify-of-friend-request', friendRequest);
+  }
+
   emitNewGroup(group: CreateChatRoomWithMembersDto) {
     group.members.forEach((member) => {
       const userId = member.user_id;
@@ -125,5 +129,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       });
     }
+  }
+
+  notifyOfFriendRequestResponse(receiverId: string) {
+    this.server.to(receiverId).emit('notify-of-friend-request-response');
   }
 }

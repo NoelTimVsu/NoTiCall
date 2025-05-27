@@ -31,6 +31,8 @@ model User {
   receivedMessages       Messages[]         @relation("ReceivedMessages")
   friendRequestsSent     FriendShip[]       @relation("UserSentFriendRequests")
   friendRequestsReceived FriendShip[]       @relation("UserReceivedFriendRequests")
+  notificationsReceived  Notification[]     @relation("NotificationsReceived")
+  notificationsSent      Notification[]     @relation("NotificationsSent")
 }
 
 model ChatRoom {
@@ -51,7 +53,7 @@ model ChatRoomMember {
   chat_room_id Int
   user_id      Int
   joined_at    DateTime? @default(now())
-  role         Role @default(USER)
+  role         Role      @default(USER)
 
   chatRoom ChatRoom @relation("ChatRoomMembers", fields: [chat_room_id], references: [id])
   user     User     @relation("UserChatRoomMemberships", fields: [user_id], references: [id])
@@ -87,6 +89,7 @@ model Messages {
 }
 
 model FriendShip {
+  id         Int      @id @default(autoincrement())
   user_id    Int
   friend_id  Int
   status     Status?
@@ -95,8 +98,25 @@ model FriendShip {
   // Relations
   user   User @relation("UserSentFriendRequests", fields: [user_id], references: [id])
   friend User @relation("UserReceivedFriendRequests", fields: [friend_id], references: [id])
+}
 
-  @@id([user_id, friend_id])
+model Notification {
+  id         Int               @id @default(autoincrement())
+  type       NotificationTypes // e.g., 'FRIEND_REQUEST', 'MESSAGE', etc.
+  message    String // Optional display message
+  user_id    Int // The user receiving the notification
+  actor_id   Int // The user who triggered the action
+  entity_id  Int? // e.g., message id, frienship id, etc.
+  read       Boolean           @default(false)
+  created_at DateTime          @default(now())
+
+  user  User  @relation("NotificationsReceived", fields: [user_id], references: [id])
+  actor User? @relation("NotificationsSent", fields: [actor_id], references: [id])
+}
+
+enum NotificationTypes {
+  FRIEND_REQUEST
+  MESSAGE
 }
 
 enum Status {
