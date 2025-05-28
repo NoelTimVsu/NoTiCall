@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import * as path from 'path';
 
@@ -41,6 +42,9 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  // Increase body size limit to accept larger media
+  app.use(bodyParser.json({ limit: '5mb' }));
 
   app.use(cookieParser());
 

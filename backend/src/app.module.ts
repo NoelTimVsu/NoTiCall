@@ -20,6 +20,8 @@ import { ChatRoomMessageModule } from './chat-room-message/chat-room-message.mod
 import { ChatRoomMessageService } from './chat-room-message/chat-room-message.service';
 import { ChatRoomMessageController } from './chat-room-message/chat-room-message.controller';
 import { NotificationModule } from './notification/notification.module';
+import { MediaUploadService } from './media-upload/media-upload.service';
+import { MediaUploadModule } from './media-upload/media-upload.module';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { NotificationModule } from './notification/notification.module';
     ChatRoomModule,
     ChatRoomMessageModule,
     NotificationModule,
+    MediaUploadModule,
   ],
   controllers: [
     AppController,
@@ -51,6 +54,7 @@ import { NotificationModule } from './notification/notification.module';
     ChatGateway,
     ChatRoomService,
     ChatRoomMessageService,
+    MediaUploadService,
   ],
 })
 export class AppModule {}

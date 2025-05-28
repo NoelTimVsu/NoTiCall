@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { FriendShip, Messages } from '@prisma/client';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GroupDto } from 'src/chat-room/dto/group.dto';
 import type { CreateChatRoomWithMembersDto } from 'src/chat-room/dto/create-chat-room-members.dto';
 
@@ -22,6 +22,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
   connectedUsers: Map<string, string>;
   private userSockets: Map<number, Socket>;
+
+  private readonly logger = new Logger(ChatGateway.name);
 
   constructor() {
     this.connectedUsers = new Map<string, string>();
@@ -61,7 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // this is how we will create our own server for video calls
   @SubscribeMessage('send-message')
   handleMessage(client: Socket, payload: { sender: string; message: string }) {
-    console.log('Received message:', payload);
+    this.logger.log('Received message:', payload);
 
     // Broadcast to all clients
     this.server.emit('receive_message', payload);
@@ -70,7 +72,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join-room')
   handleJoinRoom(client: Socket, roomId: string) {
     void client.join(`chat-room-${roomId}`);
-    console.log(`joining-room: ${client.id} joined chat-room-${roomId}`);
+    this.logger.log(`joining-room: ${client.id} joined chat-room-${roomId}`);
   }
 
   sendNewMessage(receiverId: string, message: Messages) {

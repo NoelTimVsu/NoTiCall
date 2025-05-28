@@ -10,7 +10,7 @@ interface UserState {
   isUpdatingProfile: boolean;
   partialUsers: User[];
   allUsers: User[];
-  updateProfile: (updateProfile: UpdateProfileData & { id: string }) => Promise<void>;
+  updateProfile: (updateProfile: UpdateProfileData & { id: number | undefined }) => Promise<void>;
   fetchAllUsers: () => Promise<void>;
   sendFriendRequest: (friendId: number) => Promise<void>;
   fetchUsersByCriteria: (criteria: string) => Promise<void>;
@@ -23,7 +23,7 @@ export const useUserStore = create<UserState>((set) => {
     partialUsers: [],
     allUsers: [],
 
-    updateProfile: async (updateProfile: UpdateProfileData & { id: string }) => {
+    updateProfile: async (updateProfile: UpdateProfileData & { id: number | undefined }) => {
       set({ isUpdatingProfile: true });
       try {
         const { id, ...payload } = updateProfile;

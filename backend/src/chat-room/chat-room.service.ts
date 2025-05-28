@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DeleteChatRoomDto } from './dto/delete-chat-room.dto';
 import { ChatService } from '../sockets/chat/chat.service';
@@ -7,6 +7,8 @@ import type { CreateChatRoomWithMembersDto } from './dto/create-chat-room-member
 
 @Injectable()
 export class ChatRoomService {
+  private readonly logger = new Logger(ChatRoomService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => ChatService))
@@ -144,7 +146,7 @@ export class ChatRoomService {
 
   async deleteChatRoom(deleteChatRoomDto: DeleteChatRoomDto) {
     const { chat_room_id, user_id } = deleteChatRoomDto;
-    console.log('deleteChatRoomDto: ', deleteChatRoomDto);
+    this.logger.log('deleteChatRoomDto: ', deleteChatRoomDto);
     const members = await this.prisma.chatRoomMember.findMany({
       where: {
         chat_room_id: chat_room_id,

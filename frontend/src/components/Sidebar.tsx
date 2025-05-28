@@ -82,7 +82,7 @@ function Sidebar() {
   if (isUsersLoading || isGroupsLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-36 md:w-60 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full w-20 sm:w-36 md:w-60 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
@@ -145,7 +145,7 @@ function Sidebar() {
             onClick={() => setSelectedUser(friend)}
             className={`w-full p-3 flex items-center gap-3 hover:bg-blue-50 transition-colors ${selectedUser?.id === friend.id ? 'bg-base-300' : ''}`}
           >
-            <div className="relative mx-auto md:mx-0">
+            <div className="relative sm:mx-0">
               <CustomAvatar
                 profile_pic={friend.profile_pic}
                 fallback={friend.username.slice(0, 2).toUpperCase()}
@@ -155,7 +155,7 @@ function Sidebar() {
               )}
             </div>
 
-            <div className="hidden md:block text-left min-w-0">
+            <div className="block text-left min-w-0">
               <div className="font-medium truncate">{friend.full_name}</div>
               <div className="text-sm text-zinc-400">
                 {onlineUsers.includes(String(friend.id)) ? 'Online' : 'Offline'}

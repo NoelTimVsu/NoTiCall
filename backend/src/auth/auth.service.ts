@@ -1,4 +1,11 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
@@ -9,6 +16,8 @@ import { SingInDto } from 'src/auth/dto/signin.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
@@ -68,7 +77,7 @@ export class AuthService {
 
       return await this.getTokens(foundUser);
     } catch (error) {
-      console.log(error);
+      this.logger.error(error);
       throw error;
     }
   }

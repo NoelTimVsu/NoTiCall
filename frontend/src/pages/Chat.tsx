@@ -100,9 +100,20 @@ function ChatContainer() {
             </div>
 
             <div className="chat-header mb-1">
-              <time className="text-sm opacity-50 ml-1">
-                {formatMessageTime(message.created_at)}
-              </time>
+              <div className="text-sm opacity-50 ml-1">
+                <span>{message.sender_id === authUser?.id
+                  ? authUser?.username
+                  : selectedUser && 'username' in selectedUser
+                    ? selectedUser?.username
+                    : selectedUser && 'members' in selectedUser
+                      ? selectedUser.members
+                        .find(member => member.user.id === message.sender_id)
+                        ?.user.username
+                      : undefined}</span> at {" "}
+                <time>
+                  {formatMessageTime(message.created_at)}
+                </time>
+              </div>
             </div>
 
             <div
@@ -229,8 +240,6 @@ function MessageInput() {
       if (typeof result === 'string') {
         setImagePreview(result);
       }
-      console.log('result ', result);
-      console.log('reader: ', reader);
     };
     reader.readAsDataURL(file);
   };

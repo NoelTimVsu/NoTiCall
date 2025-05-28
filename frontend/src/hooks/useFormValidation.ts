@@ -6,7 +6,7 @@ export const useSignUpFormValidation = () => {
   return useForm({
     resolver: zodResolver(signUpFormValidation),
     defaultValues: {
-      fullName: "",
+      full_name: "",
       username: "",
       email: "",
       password: "",
@@ -28,9 +28,10 @@ export const useUpdateProfileFormValidation = () => {
   return useForm({
     resolver: zodResolver(updateProfileFormValidation),
     defaultValues: {
-      fullName: "",
+      full_name: "",
       username: "",
       email: "",
+      image: "",
     },
   });
 };
